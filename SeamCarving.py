@@ -166,6 +166,99 @@ def removeSeam (image, camino, vertical):
 
     return np.delete(image, -1, 0)
 
+def addSeam (image, camino, vertical):
+
+    n = image.shape[0]
+    m = image.shape[1]
+    
+    if vertical:
+        
+        img = np.empty((n, m + 1, 3), dtype=np.float)
+        
+        image = image.astype(np.float)
+        
+        for i in range (0, n):
+            
+            for j in range (0, camino[i]):
+                img[n - i - 1, j] = image[n - i - 1, j]
+            
+            if camino[i] > 0: 
+                left = image[n - i - 1, camino[i] - 1] * image[n - i - 1, camino[i] - 1]
+                
+                center = image[n - i - 1, camino[i]] * image[n - i - 1, camino[i]]
+                
+                new = (left + center)/2
+                new = np.sqrt(new)
+                
+                img[n - i - 1, camino[i]] = new
+            
+            else:
+                img[n - i - 1, camino[i]] = image[n - i - 1, camino[i]]
+            
+            if camino[i] < (m - 1):
+                center = image[n - i - 1, camino[i]] * image[n - i - 1, camino[i]]
+                
+                right = image[n - i - 1, camino[i] + 1] * image[n - i - 1, camino[i] + 1]
+               
+                new = (center + right)/2
+                
+                new = np.sqrt(new)
+                
+                img[n - i - 1, camino[i] + 1] = new
+            
+            else:
+                img[n - i - 1, camino[i] + 1] = image[n - i - 1, camino[i]]
+            
+            for j in range (camino[i] + 1, m):
+                img[n - i - 1, j + 1] = image[n - i - 1, j]
+        
+        img = img.astype(np.uint8)
+            
+        return img
+
+    img = np.empty((n + 1, m, 3), dtype=np.float)
+    
+    image = image.astype(np.float)
+    
+    for i in range (0, m):
+        
+        for j in range (0, camino[i]):
+            img[j, m - i - 1] = image[j, m - i - 1]
+        
+        if camino[i] > 0: 
+            up = image[camino[i] - 1, m - i - 1] * image[camino[i] - 1, m - i - 1]
+            
+            center = image[camino[i], m - i - 1] * image[camino[i], m - i - 1]
+            
+            new = (up + center)/2
+            new = np.sqrt(new)
+            
+            img[camino[i], m - i - 1] = new
+        
+        else:
+            img[camino[i], m - i - 1] = image[camino[i], m - i - 1]
+        
+        if camino[i] < (n - 1):
+            center = image[camino[i], m - i - 1] * image[camino[i], m - i - 1]
+            
+            down = image[camino[i] + 1, m - i - 1] * image[camino[i] + 1, m - i - 1]
+           
+            new = (center + down)/2
+            
+            new = np.sqrt(new)
+            
+            img[camino[i] + 1, m - i - 1] = new
+        
+        else:
+            img[camino[i] + 1, m - i - 1] = image[camino[i], m - i - 1]
+        
+        for j in range (camino[i] + 1, n):
+            img[j + 1, m - i - 1] = image[j, m - i - 1]
+    
+    img = img.astype(np.uint8)
+        
+    return img
+
 # Buscamos el orden en el que hay que aplicar las costuras para conseguir una
 # imagen n x m -> n' x m' (fórmula 6 - página 5 del paper)
 # Primero he supuesto que solo vamos a reducir imágenes, para ampliar, en vez
@@ -228,10 +321,10 @@ def seamsOrder (img, nn, nm):
     # que hacerse así
     for i in range (1, r):
         
-        hor_min, hor_indx, path = horizontalSeam(image)
-        vert_min, vert_min, vert_path = verticalSeam(image)
-        
         if c > 1:
+            hor_min, hor_indx, path = horizontalSeam(image)
+            vert_min, vert_min, vert_path = verticalSeam(image)
+        
             T[i,1] = min(T[i-1,1] + hor_min, T[i, 0] + vert_min)
     
             if T[i,1] == T[i, 0] + vert_min:
@@ -261,19 +354,16 @@ def selectSeamsOrder (image, T, options):
     r = T.shape[0] - 1
     c = T.shape[1] - 1
     cont = 1
-    print("R: ", r)
-    print("C: ", c)
+    
     order = np.zeros((r+c))
 
     order[0] = options[r,c]
     
-    print("Elegido: ", order[cont])
     r -= 1
     c -= 1
     
     while r > 0 and c > 0:
-
-        print("Orden: ", options[r,c])
+        
         if T[r, c-1] < T[r-1, c]:
 
             order[cont] = 1
@@ -281,22 +371,20 @@ def selectSeamsOrder (image, T, options):
 
         else:
             r -= 1
-        
-
-        print("Elegido: ", order[cont])
+            
         cont += 1
         
     while c > 0:
-        print("Orden: ", options[r,c])
+        
         order[cont] = 1
         c -= 1
-        print("Elegido: ", order[cont])
+        
         cont += 1
     
     while r > 0:
-        print("Orden: ", options[r,c])
+        
         r -= 1
-        print("Elegido: ", order[cont])
+        
         cont+= 1
 
     return order
@@ -310,12 +398,14 @@ def removeOrderSeams (img, order):
         if o:
             a, b, path = horizontalSeam (image)
             image = removeSeam (image, path, 0)
+            img = drawSeams([], [path], img)
 
         else:
             a, b, path = verticalSeam (image)
             image = removeSeam (image, path, 1)
+            img = drawSeams([path], [], img)
         
-    return image, path
+    return image, img
 
 def addOrderSeams (img, order):
     
@@ -329,7 +419,7 @@ def addOrderSeams (img, order):
 
         else:
             a, b, path = verticalSeam (image)
-            image = removeSeam (image, path, 1)
+            image = addSeam (image, path, 1)
 
     return image
 
@@ -359,10 +449,15 @@ def drawSeams(vertical_seams, horizontal_seams, image):
 # Prueba de funcionamiento
 image = readImage("christmas_original.png", 1)
 
-T, options = seamsOrder(image, image.shape[0] - 15, image.shape[1] - 15)
-order = selectSeamsOrder (image, T, options)
-#
-img1, path = removeOrderSeams (image, order)
+img = image.copy()
+
+for i in range (0, 50):
+    a, b, camino = horizontalSeam (img)
+    img = addSeam (img, camino, 0)
+#T, options = seamsOrder(image, image.shape[0], image.shape[1] - 1)
+#order = selectSeamsOrder (image, T, options)
+##
+#img1 = addOrderSeams (image, order)
 #img2 = addOrderSeams (image, order)
 
 # Tarda muchisimo en ejecutar con esta imagen porque es grande.
@@ -370,7 +465,7 @@ img1, path = removeOrderSeams (image, order)
 # que funciona el método)
 
 cv2.imshow("original", image)
-cv2.imshow("costuras eliminadas", img1)
+cv2.imshow("costuras eliminadas", img)
 #cv2.imshow("costuras añadidas", img2)
 
 cv2.waitKey(0)
