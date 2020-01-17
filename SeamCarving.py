@@ -283,71 +283,140 @@ def seamsOrder (img, nn, nm):
                         # 0 -> costura horizontal ; 1 -> costura vertical
 
     # Rellenamos la primera columna de la tabla
-    min_energy, indx, camino = horizontalSeam(image)
-
-    T[1,0] = T[0,0] + min_energy
-
-    options[1,0] = 0
-
-    image = removeSeam(image, camino, 0)
-
-    hor_image = image.copy()
-
-    for i in range (2, r):
-
-        min_energy, indx, camino = horizontalSeam(hor_image)
-
-        T[i,0] = T[i-1,0] + min_energy
-
-        options[i,0] = 0
-
-        hor_image = removeSeam(hor_image, camino, 0)
-
-    vert_image = image.copy()
-
-    for i in range (1, c):
-
-        min_energy, indx, camino = verticalSeam(vert_image)
-
-        T[0,i] = T[0,i-1] + min_energy
-
-        options[0,i] = 1
-
-        vert_image = removeSeam(vert_image, camino, 1)
-
-    # No estoy segura si habría que ir modificando asi la imagen. Como se tiene
-    # que rellenar la tabla para cada posible tamaño que puede tomar la imagen,
-    # tendrá que, a la fuerza, eliminar c filas y r columnas, pero no se si tendría
-    # que hacerse así
-    for i in range (1, r):
+    if r > 1:
+        min_energy, indx, camino = horizontalSeam(image)
+    
+        T[1,0] = T[0,0] + min_energy
+    
+        options[1,0] = 0
+    
+        image = removeSeam(image, camino, 0)
+    
+        hor_image = image.copy()
+    
+        for i in range (2, r):
+    
+            min_energy, indx, camino = horizontalSeam(hor_image)
+    
+            T[i,0] = T[i-1,0] + min_energy
+    
+            options[i,0] = 0
+    
+            hor_image = removeSeam(hor_image, camino, 0)
+    
+        vert_image = image.copy()
+    
+        for i in range (1, c):
+    
+            min_energy, indx, camino = verticalSeam(vert_image)
+    
+            T[0,i] = T[0,i-1] + min_energy
+    
+            options[0,i] = 1
+    
+            vert_image = removeSeam(vert_image, camino, 1)
+    
+        # No estoy segura si habría que ir modificando asi la imagen. Como se tiene
+        # que rellenar la tabla para cada posible tamaño que puede tomar la imagen,
+        # tendrá que, a la fuerza, eliminar c filas y r columnas, pero no se si tendría
+        # que hacerse así
+        for i in range (1, r):
+            
+            if c > 1:
+                hor_min, hor_indx, path = horizontalSeam(image)
+                vert_min, vert_min, vert_path = verticalSeam(image)
+            
+                T[i,1] = min(T[i-1,1] + hor_min, T[i, 0] + vert_min)
         
-        if c > 1:
-            hor_min, hor_indx, path = horizontalSeam(image)
-            vert_min, vert_min, vert_path = verticalSeam(image)
+                if T[i,1] == T[i, 0] + vert_min:
+                    options[i,1] = 1
         
-            T[i,1] = min(T[i-1,1] + hor_min, T[i, 0] + vert_min)
+                vert_image = image.copy()
     
-            if T[i,1] == T[i, 0] + vert_min:
-                options[i,1] = 1
+                for j in range (2, c-1):
+        
+                    hor_min, hor_indx, hor_path = horizontalSeam(vert_image)
+                    vert_min, vert_min, vert_path = verticalSeam(vert_image)
+        
+                    T[i,j] = min(T[i-1,j] + hor_min, T[i, j-1] + vert_min)
+        
+                    if T[i,j] == T[i, j-1] + vert_min:
+                        options[i,j] = 1
+        
+                    vert_image = removeSeam(vert_image, vert_path, 1)
     
-            vert_image = image.copy()
-
-            for j in range (2, c-1):
+                image = removeSeam(image, path, 0)
+        
+        print("Shape final: ", image.shape)
+        return T, options
     
-                hor_min, hor_indx, hor_path = horizontalSeam(vert_image)
-                vert_min, vert_min, vert_path = verticalSeam(vert_image)
+    if c > 1:
+        min_energy, indx, camino = verticalSeam(image)
     
-                T[i,j] = min(T[i-1,j] + hor_min, T[i, j-1] + vert_min)
+        T[0,1] = T[0,0] + min_energy
     
-                if T[i,j] == T[i, j-1] + vert_min:
-                    options[i,j] = 1
+        options[0,1] = 1
     
-                vert_image = removeSeam(vert_image, vert_path, 1)
-
-        image = removeSeam(image, path, 0)
+        image = removeSeam(image, camino, 1)
     
-    print("Shape final: ", image.shape)
-    return T, options
+        vert_image = image.copy()
+    
+        for i in range (2, c):
+    
+            min_energy, indx, camino = verticalSeam(vert_image)
+    
+            T[0,i] = T[0,i-1] + min_energy
+    
+            options[0,i] = 1
+    
+            vert_image = removeSeam(vert_image, camino, 1)
+    
+        hor_image = image.copy()
+    
+        for i in range (1, r):
+    
+            min_energy, indx, camino = horizontalSeam(hor_image)
+    
+            T[i,0] = T[i-1,0] + min_energy
+    
+            options[i,0] = 1
+    
+            hor_image = removeSeam(hor_image, camino, 0)
+    
+        # No estoy segura si habría que ir modificando asi la imagen. Como se tiene
+        # que rellenar la tabla para cada posible tamaño que puede tomar la imagen,
+        # tendrá que, a la fuerza, eliminar c filas y r columnas, pero no se si tendría
+        # que hacerse así
+        for j in range (1, c):
+            
+            if r > 1:
+                hor_min, hor_indx, path = horizontalSeam(image)
+                vert_min, vert_min, vert_path = verticalSeam(image)
+            
+                T[1,j] = min(T[1,j-1] + hor_min, T[0,j] + vert_min)
+        
+                if T[1,j] == T[0,j] + vert_min:
+                    options[1,j] = 1
+        
+                hor_image = image.copy()
+    
+                for i in range (2, r-1):
+        
+                    hor_min, hor_indx, hor_path = horizontalSeam(hor_image)
+                    vert_min, vert_min, vert_path = verticalSeam(hor_image)
+        
+                    T[i,j] = min(T[i-1,j] + hor_min, T[i, j-1] + vert_min)
+        
+                    if T[i,j] == T[i, j-1] + vert_min:
+                        options[i,j] = 1
+        
+                    hor_image = removeSeam(hor_image, vert_path, 0)
+    
+                image = removeSeam(image, path, 1)
+        
+        print("Shape final: ", image.shape)
+        return T, options
+        
 
 def selectSeamsOrder (image, T, options):
 
@@ -398,14 +467,12 @@ def removeOrderSeams (img, order):
         if o:
             a, b, path = horizontalSeam (image)
             image = removeSeam (image, path, 0)
-            img = drawSeams([], [path], img)
 
         else:
             a, b, path = verticalSeam (image)
             image = removeSeam (image, path, 1)
-            img = drawSeams([path], [], img)
         
-    return image, img
+    return image
 
 def addOrderSeams (img, order):
     
@@ -415,7 +482,7 @@ def addOrderSeams (img, order):
         
         if o:
             a, b, path = horizontalSeam (image)
-            image = removeSeam (image, path, 0)
+            image = addSeam (image, path, 0)
 
         else:
             a, b, path = verticalSeam (image)
@@ -451,22 +518,19 @@ image = readImage("christmas_original.png", 1)
 
 img = image.copy()
 
-for i in range (0, 50):
-    a, b, camino = horizontalSeam (img)
-    img = addSeam (img, camino, 0)
-#T, options = seamsOrder(image, image.shape[0], image.shape[1] - 1)
-#order = selectSeamsOrder (image, T, options)
+T, options = seamsOrder(image, image.shape[0]-15, image.shape[1]-45)
+order = selectSeamsOrder (image, T, options)
 ##
-#img1 = addOrderSeams (image, order)
-#img2 = addOrderSeams (image, order)
+img1 = addOrderSeams (image, order)
+img2 = removeOrderSeams (image, order)
 
 # Tarda muchisimo en ejecutar con esta imagen porque es grande.
 # El resultado no es el que tiene que ser, falta refinamiento (es solo para ver
 # que funciona el método)
 
 cv2.imshow("original", image)
-cv2.imshow("costuras eliminadas", img)
-#cv2.imshow("costuras añadidas", img2)
+cv2.imshow("costuras eliminadas", img2)
+cv2.imshow("costuras añadidas", img1)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
