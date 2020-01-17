@@ -4,4 +4,4 @@ Función de energía simple:
  -> http://pages.cs.wisc.edu/~moayad/cs766/index.html
  -> https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_gradients/py_gradients.html
  -> http://www.cs.cmu.edu/afs/andrew/scs/cs/15-463/f07/proj2/www/wwedler/
- ->
+ -> Explicación https://people.csail.mit.edu/mrub/talks/SeamCarving_6.865.pdf

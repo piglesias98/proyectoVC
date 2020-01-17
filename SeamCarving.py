@@ -19,10 +19,14 @@ def readImage (filename, flagColor = 1):
         sys.exit(-1)
 
     return image
-
+#Prueba
 # Duda en la energía, creo que la energía simple es así (fórmula 1 - página 3
 # del paper). No estoy segura de los parámetros (tamaño del kernel)
+<<<<<<< Updated upstream
 # Referenias:
+=======
+# Referencias:   
+>>>>>>> Stashed changes
 # -> http://pages.cs.wisc.edu/~moayad/cs766/index.html
 # -> https://medium.com/swlh/real-world-dynamic-programming-seam-carving-9d11c5b0bfca
 # -> https://avikdas.com/2019/07/29/improved-seam-carving-with-forward-energy.html
