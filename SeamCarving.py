@@ -22,11 +22,7 @@ def readImage (filename, flagColor = 1):
 #Prueba
 # Duda en la energía, creo que la energía simple es así (fórmula 1 - página 3
 # del paper). No estoy segura de los parámetros (tamaño del kernel)
-<<<<<<< Updated upstream
-# Referenias:
-=======
 # Referencias:   
->>>>>>> Stashed changes
 # -> http://pages.cs.wisc.edu/~moayad/cs766/index.html
 # -> https://medium.com/swlh/real-world-dynamic-programming-seam-carving-9d11c5b0bfca
 # -> https://avikdas.com/2019/07/29/improved-seam-carving-with-forward-energy.html
@@ -42,6 +38,19 @@ def simpleEnergy (image):
     gradient = np.abs(x) + np.abs(y)
 
     return gradient
+
+
+    """
+    Calcula la energía para cada canal r g b
+    No se aprecia diferencia en el resultado, no sé si es lo mismo
+    
+    """
+def simpleEnergyRGB(image):
+    b, g, r = cv2.split(image)
+    b_energy = np.absolute(cv2.Sobel(b, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(b, cv2.CV_64F, 0, 1, ksize=5))
+    g_energy = np.absolute(cv2.Sobel(g, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(g, cv2.CV_64F, 0, 1, ksize=5))
+    r_energy = np.absolute(cv2.Sobel(r, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(r, cv2.CV_64F, 0, 1, ksize=5))
+    return b_energy + g_energy + r_energy
 
 # Costura óptima vertical
 def verticalSeam (image):
@@ -554,19 +563,20 @@ image = readImage("surfista.jpeg", 1)
 
 img = image.copy()
 
-T, options = seamsOrder(image, image.shape[0], image.shape[1]-10)
-order = selectSeamsOrder (image, T, options)
 
-img1 = addOrderSeams (image, order)
-img2 = removeOrderSeams (image, order)
+#T, options = seamsOrder(image, image.shape[0], image.shape[1]-100)
+#order = selectSeamsOrder (image, T, options)
+
+#img1 = addOrderSeams (image, order)
+#img2 = removeOrderSeams (image, order)
 
 # Tarda muchisimo en ejecutar con esta imagen porque es grande.
 # El resultado no es el que tiene que ser, falta refinamiento (es solo para ver
 # que funciona el método)
 
-cv2.imshow("original", image)
-cv2.imshow("costuras eliminadas", img2)
-cv2.imshow("costuras añadidas", img1)
+#cv2.imshow("original", image)
+#cv2.imshow("costuras eliminadas", img2)
+#cv2.imshow("costuras añadidas", img1)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
