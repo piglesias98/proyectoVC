@@ -64,7 +64,7 @@ simple_energy2 = SeamCarving.simpleEnergyRGB(img)
 #img2 = cv2.cvtColor(simple_energy, cv2.COLOR_BGR2RGB)
 #simple_energy2 = cv2.cvtColor(simple_energy2, cv2.COLOR_BGR2RGB)
 
-representar_imagenes([simple_energy, simple_energy2], ["energia1", "energia1"])
+representar_imagenes([simple_energy, simple_energy2], ["energia1", "energia2"])
 
 
 #cv2.imshow("original", image)
