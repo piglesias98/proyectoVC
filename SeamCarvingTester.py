@@ -120,51 +120,51 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
-img = SeamCarving.readImage("playa.jpg", 1)
-nn = 200
-nm = 400
-
-imagenes=[]
-n, m = img.shape[:2]
-print("n", n)
-print("m", m)
-print("nn",nn)
-print("nm", nm)
-print("nn/n", nn/n)
-print("nm/m", nm/m)
-scale_factor = max(nn/n, nm/m)
-print(scale_factor)
-height = int(n * scale_factor)
-print("hegiht", height)
-width = int (m * scale_factor)
-print("widht", width)
-dim = (width, height)
-# resize image
-resized = cv2.resize(img, dim)
-print("resized schape", resized.shape)
-#Eliminamos las verticales o horizontales que sobren
-print("sobran ", height - nn, " horizontales")
-print("sobran ", width - nm, " verticales")
-for i in range(height - nn):
-    rotada = np.rot90(resized, 1)
-    a, b, path = SeamCarving.verticalSeam(rotada)
-    rotada = SeamCarving.removeSeam (rotada, path, 1)
-    resized = np.rot90(rotada, 1)
-for i in range(width - nm):
-    a, b, path = SeamCarving.verticalSeam(resized)
-    resized = SeamCarving.removeSeam(resized, path, 1)
-print("shape final",resized.shape)
-imagenes.append(resized)
-
-img4 = SeamCarving.readImage("playa.jpg", 1)
-
-
-T, options = SeamCarving.seamsOrder(img4, 200, 400)
-order = SeamCarving.selectSeamsOrder (img4, T, options)
-seams = SeamCarving.removeOrderSeams (img4, order)
-
-imagenes.append(seams)
-representar_imagenes(imagenes,["resizes", "seams"],1)
+#img = SeamCarving.readImage("playa.jpg", 1)
+#nn = 200
+#nm = 400
+#
+#imagenes=[]
+#n, m = img.shape[:2]
+#print("n", n)
+#print("m", m)
+#print("nn",nn)
+#print("nm", nm)
+#print("nn/n", nn/n)
+#print("nm/m", nm/m)
+#scale_factor = max(nn/n, nm/m)
+#print(scale_factor)
+#height = int(n * scale_factor)
+#print("hegiht", height)
+#width = int (m * scale_factor)
+#print("widht", width)
+#dim = (width, height)
+## resize image
+#resized = cv2.resize(img, dim)
+#print("resized schape", resized.shape)
+##Eliminamos las verticales o horizontales que sobren
+#print("sobran ", height - nn, " horizontales")
+#print("sobran ", width - nm, " verticales")
+#for i in range(height - nn):
+#    rotada = np.rot90(resized, 1)
+#    a, b, path = SeamCarving.verticalSeam(rotada)
+#    rotada = SeamCarving.removeSeam (rotada, path, 1)
+#    resized = np.rot90(rotada, 1)
+#for i in range(width - nm):
+#    a, b, path = SeamCarving.verticalSeam(resized)
+#    resized = SeamCarving.removeSeam(resized, path, 1)
+#print("shape final",resized.shape)
+#imagenes.append(resized)
+#
+#img4 = SeamCarving.readImage("playa.jpg", 1)
+#
+#
+#T, options = SeamCarving.seamsOrder(img4, 200, 400)
+#order = SeamCarving.selectSeamsOrder (img4, T, options)
+#seams = SeamCarving.removeOrderSeams (img4, order)
+#
+#imagenes.append(seams)
+#representar_imagenes(imagenes,["resizes", "seams"],1)
 #scale_factor = max(nn/n, nm/m)
 #print("nn/n", nn/n, "nm/m", nm/m)
 #print("factor", scale_factor)
@@ -187,3 +187,37 @@ representar_imagenes(imagenes,["resizes", "seams"],1)
 #
 #
 #representar_imagenes([img1, img2],["sin scale", "con scale"],1)
+#    
+#from skimage.feature import hog
+#
+#
+#img = SeamCarving.readImage("playa.jpg", 1)
+#print(img.shape)
+#
+#e1 = SeamCarving.simpleEnergy(img)
+#features  = hog(img, orientations=9, pixels_per_cell=(11, 11), cells_per_block=(1, 1), multichannel=True)
+##features = 255 * features
+#eHOG = e1.copy()
+#cells = np.split(features, 9)
+#cells = np.array(cells)
+#max_bin = cells.max(axis=0)
+#b=0
+#nh = int(eHOG.shape[0])
+#mh = int(eHOG.shape[1]) 
+#for i in range(0, nh-11, 11):
+#    for j in range(0, mh-11, 11):
+#        eHOG[i:i+11, j:j+11]= e1[i:i+11, j:j+11] / max_bin[b]
+#        b=b+1
+img = SeamCarving.readImage("playa.jpg", 1)
+hog = SeamCarving.eHOG(img)
+representar_imagenes([eHOG], ["hog"])
+#    for j in range(0, 9-2, 3):
+#        print(i,":",i+3,",",j,":",j+3)
+
+#x = np.arange(81)   
+#a = np.split(x, 9)
+#print(a)
+#print(a[3])
+#a = np.array(a)
+#minimos = a.min(axis=1)
+#print(minimos)
