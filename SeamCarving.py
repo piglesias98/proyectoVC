@@ -7,6 +7,8 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 
+from skimage.feature import hog
+
 # Leer la imagen de entrada
 # Por defecto, las imagenes se leen a color
 def readImage (filename, flagColor = 1):
@@ -51,6 +53,40 @@ def simpleEnergyRGB(image):
     g_energy = np.absolute(cv2.Sobel(g, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(g, cv2.CV_64F, 0, 1, ksize=5))
     r_energy = np.absolute(cv2.Sobel(r, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(r, cv2.CV_64F, 0, 1, ksize=5))
     return b_energy + g_energy + r_energy
+
+
+def eHOG(image):
+    simple_energy = simpleEnergy(image)
+  
+    maxHOG = np.zeros(image.shape)
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            if i-5<0: inicio_i=0
+            else: inicio_i = i-5
+            if i+6>image.shape[0]: fin_i = image.shape[0]
+            else: fin_i = i+6
+            
+            if j-5<0: inicio_j=0
+            else: inicio_j = j-5
+            if j+6>image.shape[0]: fin_j = image.shape[1]
+            else: fin_j = j+6
+            
+            window = image[inicio_i:fin_i,inicio_j:fin_j]
+            hogg = hog(window, orientations = 8)
+            maxHOG[i,j] = max(hogg)
+    return simple_energy/maxHOG
+    
+#def forwardEnergy(image):
+#    n, m = image.shape[:2]
+#    
+#    energy = np.zeros((n,m))
+#    M = np.zeros((n,m))
+#    
+#    U = np.roll(image, 1, axis=0)
+#    L = np.roll(image, 1, axis=1)
+#    r = np.roll(image, -1, axis=1 )
+#    
+#    
 
 # Costura óptima vertical
 def verticalSeam (image):
@@ -103,6 +139,8 @@ def verticalSeam (image):
         camino.append(min_ind)
 
     return M[n-1, min_ind], min_ind, camino
+
+
 
 # Costura óptima vertical
 def horizontalSeam (image):
@@ -486,6 +524,27 @@ def selectSeamsOrder (image, T, options):
         cont+= 1
 
     return order
+
+def scaleAndRemoveSeams (img, nn, nm):    
+    n, m = img.shape[:2]
+    scale_factor = max(nn/n, nm/m)
+    height = int(n * scale_factor)
+    width = int (m * scale_factor)
+    dim = (width, height)
+    # resize image
+    resized = cv2.resize(img, dim)
+    #Eliminamos las verticales o horizontales que sobren
+    for i in range(height - nn):
+        a, b, path = horizontalSeam(resized)
+        resized = removeSeam (resized, path, 0)
+    for i in range(width - nm):
+        a, b, path = verticalSeam(resized)
+        resized = removeSeam(resized, path, 1)
+    
+    return resized
+        
+    
+
 
 # Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
 # de la imagen
