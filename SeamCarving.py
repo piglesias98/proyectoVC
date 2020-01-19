@@ -24,7 +24,7 @@ def readImage (filename, flagColor = 1):
 #Prueba
 # Duda en la energía, creo que la energía simple es así (fórmula 1 - página 3
 # del paper). No estoy segura de los parámetros (tamaño del kernel)
-# Referencias:   
+# Referencias:
 # -> http://pages.cs.wisc.edu/~moayad/cs766/index.html
 # -> https://medium.com/swlh/real-world-dynamic-programming-seam-carving-9d11c5b0bfca
 # -> https://avikdas.com/2019/07/29/improved-seam-carving-with-forward-energy.html
@@ -45,7 +45,7 @@ def simpleEnergy (image):
     """
     Calcula la energía para cada canal r g b
     No se aprecia diferencia en el resultado, no sé si es lo mismo
-    
+
     """
 def simpleEnergyRGB(image):
     b, g, r = cv2.split(image)
@@ -55,38 +55,81 @@ def simpleEnergyRGB(image):
     return b_energy + g_energy + r_energy
 
 
-def eHOG(image):
-    simple_energy = simpleEnergy(image)
-  
-    maxHOG = np.zeros(image.shape)
-    for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            if i-5<0: inicio_i=0
-            else: inicio_i = i-5
-            if i+6>image.shape[0]: fin_i = image.shape[0]
-            else: fin_i = i+6
-            
-            if j-5<0: inicio_j=0
-            else: inicio_j = j-5
-            if j+6>image.shape[0]: fin_j = image.shape[1]
-            else: fin_j = j+6
-            
-            window = image[inicio_i:fin_i,inicio_j:fin_j]
-            hogg = hog(window, orientations = 8)
-            maxHOG[i,j] = max(hogg)
-    return simple_energy/maxHOG
+def eHOG(image, funcion):
     
+    if funcion:
+        simple_energy = simpleEnergy(image)
+    else:
+        simple_energy = simpleEnergyRGB(image)
+        
+
+    hogg = hog(image, orientations = 9, pixels_per_cell=(11,11), cells_per_block=(1,1), feature_vector=False, multichannel=True)
+
+    energy = np.zeros((image.shape[0],image.shape[1]))
+    maxHOG = np.zeros((hogg.shape[0], hogg.shape[1]))
+
+    for i in range(hogg.shape[0]):
+        for j in range(hogg.shape[1]):
+
+            maxHOG[i,j] = max(hogg[i,j,0,0])
+
+    # "Desnormalización"
+    maxi = maxHOG.max()
+    mini = maxHOG.min()
+    dif = maxi - mini
+
+    for i in range (maxHOG.shape[0]):
+        for j in range (maxHOG.shape[1]):
+
+            # Se normaliza cada valor de la imagen según la fórmula
+            # (normalizar en el intervalo [0,1] y ajustarlo al
+            # correspondiente intervalo [0,255])
+            maxHOG[i,j] = maxHOG[i,j] * 255
+
+    contadorx = 0
+    contadory = 0
+
+    for i in range (maxHOG.shape[0]):
+        for j in range (maxHOG.shape[1]):
+
+            for k in range (11):
+                for l in range (11):
+                    indx = 11*i + k
+                    indy = 11*j + l
+
+                    energy[indx, indy] = simple_energy[indx, indy] / maxHOG[i,j]
+#                    energy[indx, indy] = i*j
+
+#    for i in range(image.shape[0]):
+#        for j in range(image.shape[1]):
+#            if i-5<0: inicio_i=0
+#            else: inicio_i = i-5
+#            if i+6>image.shape[0]: fin_i = image.shape[0]
+#            else: fin_i = i+6
+#
+#            if j-5<0: inicio_j=0
+#            else: inicio_j = j-5
+#            if j+6>image.shape[0]: fin_j = image.shape[1]
+#            else: fin_j = j+6
+#
+#            window = image[inicio_i:fin_i,inicio_j:fin_j]
+#            print(np.array(window).shape)
+#            hogg = hog(img, orientations = 9)
+#            maxHOG[i,j] = max(hogg)
+
+    return energy.astype(np.uint8)#, simple_energy/maxHOG,
+
 #def forwardEnergy(image):
 #    n, m = image.shape[:2]
-#    
+#
 #    energy = np.zeros((n,m))
 #    M = np.zeros((n,m))
-#    
+#
 #    U = np.roll(image, 1, axis=0)
 #    L = np.roll(image, 1, axis=1)
 #    r = np.roll(image, -1, axis=1 )
-#    
-#    
+#
+#
 
 # Costura óptima vertical
 def verticalSeam (image):
@@ -525,7 +568,7 @@ def selectSeamsOrder (image, T, options):
 
     return order
 
-def scaleAndRemoveSeams (img, nn, nm):    
+def scaleAndRemoveSeams (img, nn, nm):
     n, m = img.shape[:2]
     scale_factor = max(nn/n, nm/m)
     height = int(n * scale_factor)
@@ -540,10 +583,10 @@ def scaleAndRemoveSeams (img, nn, nm):
     for i in range(width - nm):
         a, b, path = verticalSeam(resized)
         resized = removeSeam(resized, path, 1)
-    
+
     return resized
-        
-    
+
+
 
 
 # Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
