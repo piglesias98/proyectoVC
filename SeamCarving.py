@@ -63,25 +63,7 @@ def simpleEnergyRGB(image):
     r_energy = np.absolute(cv2.Sobel(r, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(r, cv2.CV_64F, 0, 1, ksize=5))
     return b_energy + g_energy + r_energy
 
-<<<<<<< HEAD
- 
-def eHOG(image):    
 
-    e1 = simpleEnergy(image)
-    features  = hog(img, orientations=9, pixels_per_cell=(11, 11), cells_per_block=(1, 1), multichannel=True)
-    features = 255 * features   #deshacemos la normalización
-    eHOG = e1.copy()
-    cells = np.split(features, 9)
-    cells = np.array(cells)
-    max_bin = cells.max(axis=0)
-    b=0
-    nh = int(eHOG.shape[0])
-    mh = int(eHOG.shape[1]) 
-    for i in range(0, nh-11, 11):
-        for j in range(0, mh-11, 11):
-            eHOG[i:i+11, j:j+11]= e1[i:i+11, j:j+11] / max_bin[b]
-            b=b+1
-    return eHOG
     
     
 #def forwardEnergy(image):
@@ -94,15 +76,13 @@ def eHOG(image):
 #    L = np.roll(image, 1, axis=1)
 #    r = np.roll(image, -1, axis=1 )
 #    
-#    
-=======
+
 def eHOG(image, funcion=0):
 
     if funcion:
         simple_energy = simpleEnergy(image)
     else:
         simple_energy = simpleEnergyRGB(image)
->>>>>>> Laura-DEV
 
     hogg = hog(image, orientations = 9, pixels_per_cell=(11,11), cells_per_block=(1,1), feature_vector=True, multichannel=True)
 

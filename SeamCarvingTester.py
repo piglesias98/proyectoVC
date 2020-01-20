@@ -121,7 +121,6 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
-<<<<<<< HEAD
 #img = SeamCarving.readImage("playa.jpg", 1)
 =======
 
@@ -156,7 +155,6 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 
 
 
->>>>>>> Laura-DEV
 #nn = 200
 #nm = 400
 #
@@ -224,7 +222,6 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 
 #
 #representar_imagenes([img1, img2],["sin scale", "con scale"],1)
-<<<<<<< HEAD
 #    
 #from skimage.feature import hog
 #
@@ -246,9 +243,9 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #    for j in range(0, mh-11, 11):
 #        eHOG[i:i+11, j:j+11]= e1[i:i+11, j:j+11] / max_bin[b]
 #        b=b+1
-img = SeamCarving.readImage("playa.jpg", 1)
-hog = SeamCarving.eHOG(img)
-representar_imagenes([eHOG], ["hog"])
+#img = SeamCarving.readImage("playa.jpg", 1)
+#hog = SeamCarving.eHOG(img)
+#representar_imagenes([eHOG], ["hog"])
 #    for j in range(0, 9-2, 3):
 #        print(i,":",i+3,",",j,":",j+3)
 
@@ -259,27 +256,11 @@ representar_imagenes([eHOG], ["hog"])
 #a = np.array(a)
 #minimos = a.min(axis=1)
 #print(minimos)
-=======
+
+#
+#
+#mask = SeamCarving.readImage("mask.jpg", 0)
+#h, w = SeamCarving.maskSize(mask)
+#print(h,w)
 
 
-mask = SeamCarving.readImage("mask.jpg", 0)
-h, w = SeamCarving.maskSize(mask)
-print(h,w)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> Laura-DEV
