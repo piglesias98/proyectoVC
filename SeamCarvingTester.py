@@ -13,8 +13,9 @@ from matplotlib import pyplot as plt
 #from skimage.feature import hog
 
 
-import SeamCarving
+import SeamsCarving
 import energias
+import Basics
 
 
 
@@ -76,38 +77,41 @@ def verticalSeam (image, energy):
 
     return SeamCarving.crearCamino (M)
 
-img = SeamCarving.readImage("harry.jpg", 1)
-positivo = SeamCarving.readImage("positivo_harry.jpg", 0)
-negativo = SeamCarving.readImage("negativo_harry.jpg", 0)
+img = Basics.readImage("harry.jpg", 1)
+positivo = Basics.readImage("positivo_harry.jpg", 0)
+negativo = Basics.readImage("negativo_harry.jpg", 0)
+#
+#n, m = img.shape[:2]
+#scale_factor = 0.5
+#height = int(n * scale_factor)
+#width = int (m * scale_factor)
+#dim = (width, height)
+#
+#img = cv2.resize(img, dim)
+#negativo = cv2.resize(negativo, dim)
+#positivo = cv2.resize(positivo, dim)
+#
+#positivo = positivo.astype(np.float)
+#negativo = negativo.astype(np.float)
+#
+#for i in range (250):
+#
+#    energia = energias.forwardEnergy(img)
+#
+#    energia = SeamCarving.removeEnergy(energia, negativo)
+#
+#    energia = SeamCarving.preserveEnergy(energia, positivo)
+#
+#    a, b, camino = SeamCarving.Seam(img, energia)
+#
+##    image = SeamCarving.drawSeams ([camino], [], image)
+#    img = SeamCarving.removeSeam (img, camino)
+#    negativo = SeamCarving.removeSeam (negativo, camino)
+#    positivo = SeamCarving.removeSeam (positivo, camino)
+#
+#
+##image = image.astype(np.uint8)
+#representar_imagenes([img], ["edit"])
 
-n, m = img.shape[:2]
-scale_factor = 0.5
-height = int(n * scale_factor)
-width = int (m * scale_factor)
-dim = (width, height)
-
-img = cv2.resize(img, dim)
-negativo = cv2.resize(negativo, dim)
-positivo = cv2.resize(positivo, dim)
-
-positivo = positivo.astype(np.float)
-negativo = negativo.astype(np.float)
-
-for i in range (250):
-
-    energia = energias.forwardEnergy(img)
-
-    energia = SeamCarving.removeEnergy(energia, negativo)
-
-    energia = SeamCarving.preserveEnergy(energia, positivo)
-
-    a, b, camino = SeamCarving.Seam(img, energia)
-
-#    image = SeamCarving.drawSeams ([camino], [], image)
-    img = SeamCarving.removeSeam (img, camino)
-    negativo = SeamCarving.removeSeam (negativo, camino)
-    positivo = SeamCarving.removeSeam (positivo, camino)
-
-
-#image = image.astype(np.uint8)
-representar_imagenes([img], ["edit"])
+resultado = SeamsCarving.objectRemoval(img, negativo, positivo)
+representar_imagenes([resultado], ["edit"])
