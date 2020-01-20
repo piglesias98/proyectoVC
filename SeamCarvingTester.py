@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 
 
 import SeamCarving
-
+import energias
 
 
 
@@ -51,7 +51,30 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 	plt.show()
 
 
+def verticalSeam (image, energy):
 
+    n, m = image.shape[:2]
+
+
+    M = energy.copy()  # Matriz para la energía acumulativa mínima
+
+    # Recorremos la imagen desde la segunda fila hasta la última
+    for i in range (1, n):
+
+        if m > 1:
+
+            M[i,0] = energy[i,0] + min(M[i-1, 0], M[i-1,1])
+
+        else:
+            M[i,0] = energy[i,0] + M[i-1, 0]
+
+        for j in range (1, m-1):
+
+            M[i,j] = energy[i,j] + min(M[i-1,j-1], M[i-1,j], M[i-1,j+1])
+
+        M[i,m-1] = energy[i,m-1] + min(M[i-1, m-2], M[i-1,m-1])
+
+    return SeamCarving.crearCamino (M)
 
 
 
@@ -123,34 +146,74 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
 
-img = SeamCarving.readImage("arco.jpg", 1)
+img = SeamCarving.readImage("perro.jpg", 1)
+#img = img.astype(np.float)
+mascara = SeamCarving.readImage("mascara_perro.jpg", 0)
+mascara = mascara.astype(np.float)
 
-img_v = img.copy()
-img_f = img.copy() 
+mascara2 = mascara.copy()
 
-image_v = img.copy()
-image_f = img.copy()
 
-for i in range (100):
+#image = image.astype(np.float)
+maxi = mascara.max()
+mini = mascara.min()
+dif = maxi - mini
+
+for i in range (0, (mascara.shape)[0]):
+    for j in range (0, (mascara.shape)[1]):
+            
+            if mascara[i,j] > 243:
+                mascara[i,j] = 1
+
+#image = img * mascara
+
+#image = image.astype(np.uint8)
+
+for i in range (50):
     
-    camino_v = SeamCarving.verticalSeam(image_v, SeamCarving.simpleEnergyRGB)
-    camino_f = SeamCarving.verticalSeam(image_f, SeamCarving.forwardEnergy)
-    img_v = SeamCarving.drawSeams ([camino_v], [], img_v)
-    img_f = SeamCarving.drawSeams ([camino_f], [], img_f)
+    energia = energias.forwardEnergy(img)
     
-    image_v = SeamCarving.removeSeam (image_v, camino_v)
-    image_f = SeamCarving.removeSeam (image_f, camino_f)
+    energia = energia * mascara
+    
+    camino = verticalSeam(img, energia)
+    
+#    image = SeamCarving.drawSeams ([camino], [], image)
+    img = SeamCarving.removeSeam (img, camino)
+    mascara = SeamCarving.removeSeam (mascara, camino)
+    
 
-#image = SeamCarving.eHOG (img)
-#simple = SeamCarving.simpleEnergy(img)
-#RGB = SeamCarving.simpleEnergyRGB(img)
-#
-#hog1 = SeamCarving.eHOG(img, 1)
-#hog2 = SeamCarving.eHOG(img, 0)
-#
-#representar_imagenes([simple, RGB], ["simple", "RGB"])
-representar_imagenes([img_v, img_f], ["original", "image"])
-representar_imagenes([image_v, image_f], ["original", "image"])
+#image = image.astype(np.uint8)
+representar_imagenes([img], ["edit"])
+
+#image = SeamCarving.eHOG(img)
+#image1 = SeamCarving.simpleEnergy(img)
+#representar_imagenes([image, image1], ["original", "image"])
+#img_v = img.copy()
+#img_f = img.copy()
+####
+#image_v = img.copy()
+#image_f = img.copy()
+###
+#for i in range (20):
+####
+#    camino_v = SeamCarving.verticalSeam(image_v, energias.forwardEnergySin)
+#    camino_f = SeamCarving.verticalSeam(image_f, energias.forwardEnergyCon)
+#    img_v = SeamCarving.drawSeams ([camino_v], [], img_v)
+#    img_f = SeamCarving.drawSeams ([camino_f], [], img_f)
+####
+#    image_v = SeamCarving.removeSeam (image_v, camino_v)
+#    image_f = SeamCarving.removeSeam (image_f, camino_f)
+###
+####image = SeamCarving.eHOG (img)
+####simple = SeamCarving.simpleEnergy(img)
+####RGB = SeamCarving.simpleEnergyRGB(img)
+####
+####hog1 = SeamCarving.eHOG(img, 1)
+####hog2 = SeamCarving.eHOG(img, 0)
+####
+####representar_imagenes([simple, RGB], ["simple", "RGB"])
+#representar_imagenes([img_v, img_f], ["Sin", "Con"])
+#representar_imagenes([image_v, image_f], ["Sin", "Con"])
 
 
 

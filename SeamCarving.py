@@ -5,9 +5,9 @@ import sys
 
 import numpy as np
 
-from matplotlib import pyplot as plt
-
 from skimage.feature import hog
+
+import energias
 
 # Leer la imagen de entrada
 # Por defecto, las imagenes se leen a color
@@ -21,73 +21,6 @@ def readImage (filename, flagColor = 1):
         sys.exit(-1)
 
     return image
-
-#Prueba
-# Duda en la energía, creo que la energía simple es así (fórmula 1 - página 3
-# del paper). No estoy segura de los parámetros (tamaño del kernel)
-# Referencias:
-# -> http://pages.cs.wisc.edu/~moayad/cs766/index.html
-# -> https://medium.com/swlh/real-world-dynamic-programming-seam-carving-9d11c5b0bfca
-# -> https://avikdas.com/2019/07/29/improved-seam-carving-with-forward-energy.html
-def simpleEnergy (image):
-
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    image = image.astype(np.float)
-
-    x = np.abs(cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=5))
-    y = np.abs(cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=5))
-
-    return x + y
-
-"""
-    Calcula la energía para cada canal r g b
-    No se aprecia diferencia en el resultado, no sé si es lo mismo
-
-"""
-def simpleEnergyRGB(image):
-    b, g, r = cv2.split(image)
-    b_energy = np.absolute(cv2.Sobel(b, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(b, cv2.CV_64F, 0, 1, ksize=5))
-    g_energy = np.absolute(cv2.Sobel(g, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(g, cv2.CV_64F, 0, 1, ksize=5))
-    r_energy = np.absolute(cv2.Sobel(r, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(r, cv2.CV_64F, 0, 1, ksize=5))
-    return b_energy + g_energy + r_energy
-
-def eHOG(image, funcion=0):
-
-    if funcion:
-        simple_energy = simpleEnergy(image)
-    else:
-        simple_energy = simpleEnergyRGB(image)
-
-    hogg = hog(image, orientations = 9, pixels_per_cell=(11,11), cells_per_block=(1,1), feature_vector=True, multichannel=True)
-
-    energy = np.zeros(image.shape[:2])
-#    maxHOG = np.zeros((hogg.shape[0], hogg.shape[1]))
-    bins = np.split (hogg, 9)
-
-    bins = np.array(bins)
-
-    bins = bins.max(axis=0)
-    print(bins.shape)
-#    for i in range(hogg.shape[0]):
-#        for j in range(hogg.shape[1]):
-#
-#            # Multiplicamos por 255 para "desnormalización"
-#            maxHOG[i,j] = max(hogg[i,j,0,0]) * 255
-
-
-
-    # Calculamos eHOG
-    for i in range (bins.shape[0]):
-
-        for k in range (11):
-            for l in range (11):
-                indx = 11*i + k
-                indy = 11*i + l
-
-                energy[indx, indy] = simple_energy[indx, indy] / bins[i]
-
-    return energy.astype(np.uint8)
 
 def crearCamino (M):
 
@@ -117,52 +50,6 @@ def crearCamino (M):
 
     return camino
 
-def forwardEnergy(image):
-
-    n, m = image.shape[:2]
-
-    energy = np.zeros((n,m))
-    M = np.zeros((n,m))
-
-    img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY).astype(np.float64)
-
-#    img = cv2.copyMakeBorder(img, top=1, bottom=0, left=1, right=1, borderType=cv2.BORDER_REPLICATE)
-
-    U = np.roll(img, 1, axis=0)
-    L = np.roll(img, 1, axis=1)
-    R = np.roll(img, -1, axis=1 )
-
-    cU = np.abs(R - L)
-    cL = np.abs(U - L) + cU
-    cR = np.abs(U - R) + cU
-
-#    cU = cU[1:, 1:-1]
-#    cL = cL[1:, 1:-1]
-#    cR = cR[1:, 1:-1]
-
-    M[0] = cU[0]
-
-    for i in range(1, n):
-
-        mU = M[i-1]
-        mL = np.roll(mU, 1)
-        mR = np.roll(mU, -1)
-
-        # M(x,y) = min {M(x-1,y-1) + CL(x,y)
-        #               M(x,y-1) + CU(x,y)
-        #               M(x+1,y+1) + CR(x,y)}
-
-        mLUR = np.array([mL, mU, mR])
-        cLUR = np.array([cL[i], cU[i], cR[i]])
-        mLUR += cLUR
-
-        argmins = np.argmin(mLUR, axis=0)
-        M[i] = np.choose(argmins, mLUR)
-        energy[i] = np.choose(argmins, cLUR)
-
-    # Devolvemos energía para crear el camino que implique una menor energía final (después de eliminar o añadir)
-    return (energy)
-
 # Costura óptima vertical
 def verticalSeam (image, funcion):
 
@@ -189,6 +76,8 @@ def verticalSeam (image, funcion):
         M[i,m-1] = energy[i,m-1] + min(M[i-1, m-2], M[i-1,m-1])
 
     return crearCamino (M)
+
+
 
 # Costura óptima vertical
 def horizontalSeam (image):

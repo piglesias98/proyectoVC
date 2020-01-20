@@ -2,15 +2,17 @@
 
 + Simple Energy RGB
 - Rotar la imagen en vez de usar horizontal seams  -> es una tontería
-- Distintos tipos de de energía
-	+ eHOG
-	- Forward Energy
++ Distintos tipos de de energía
+	- eHOG
+	+ Forward Energy
 + Optimización con escalado previo
 - Optimizar el código en general -> creo que hacerlo con una matriz está bien y no hace falta usar punteros
-- Protección de objetos con máscaras de bits
-- Eliminación de objetos con máscaras de bits
+	-> Numpy
++ Protección de objetos con máscaras de bits
++ Eliminación de objetos con máscaras de bits
 - Probar con muchas imágenes
 - MEMORIA!!!!!
+- Modular
 
 
 ## Enlaces útiles
