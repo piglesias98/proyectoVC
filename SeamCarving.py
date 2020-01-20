@@ -15,6 +15,12 @@ def readImage (filename, flagColor = 1):
 
     return cv2.imread(filename, flagColor)
 
+def maskSize(mask):
+    rows, cols = np.where(mask < 200)
+    height = np.amax(rows) - np.amin(rows) + 1
+    width = np.amax(cols) - np.amin(cols) + 1
+    return height, width
+
 def crearCamino (M):
 
     n, m = M.shape[:2]
