@@ -21,6 +21,7 @@ def readImage (filename, flagColor = 1):
         sys.exit(-1)
 
     return image
+
 #Prueba
 # Duda en la energía, creo que la energía simple es así (fórmula 1 - página 3
 # del paper). No estoy segura de los parámetros (tamaño del kernel)
@@ -34,19 +35,16 @@ def simpleEnergy (image):
 
     image = image.astype(np.float)
 
-    x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=5)
-    y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=5)
+    x = np.abs(cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=5))
+    y = np.abs(cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=5))
 
-    gradient = np.abs(x) + np.abs(y)
+    return x + y
 
-    return gradient
-
-
-    """
+"""
     Calcula la energía para cada canal r g b
     No se aprecia diferencia en el resultado, no sé si es lo mismo
 
-    """
+"""
 def simpleEnergyRGB(image):
     b, g, r = cv2.split(image)
     b_energy = np.absolute(cv2.Sobel(b, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(b, cv2.CV_64F, 0, 1, ksize=5))
@@ -54,112 +52,48 @@ def simpleEnergyRGB(image):
     r_energy = np.absolute(cv2.Sobel(r, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(r, cv2.CV_64F, 0, 1, ksize=5))
     return b_energy + g_energy + r_energy
 
+def eHOG(image, funcion=0):
 
-def eHOG(image, funcion):
-    
     if funcion:
         simple_energy = simpleEnergy(image)
     else:
         simple_energy = simpleEnergyRGB(image)
-        
 
-    hogg = hog(image, orientations = 9, pixels_per_cell=(11,11), cells_per_block=(1,1), feature_vector=False, multichannel=True)
+    hogg = hog(image, orientations = 9, pixels_per_cell=(11,11), cells_per_block=(1,1), feature_vector=True, multichannel=True)
 
-    energy = np.zeros((image.shape[0],image.shape[1]))
-    maxHOG = np.zeros((hogg.shape[0], hogg.shape[1]))
+    energy = np.zeros(image.shape[:2])
+#    maxHOG = np.zeros((hogg.shape[0], hogg.shape[1]))
+    bins = np.split (hogg, 9)
 
-    for i in range(hogg.shape[0]):
-        for j in range(hogg.shape[1]):
+    bins = np.array(bins)
 
-            maxHOG[i,j] = max(hogg[i,j,0,0])
-
-    # "Desnormalización"
-    maxi = maxHOG.max()
-    mini = maxHOG.min()
-    dif = maxi - mini
-
-    for i in range (maxHOG.shape[0]):
-        for j in range (maxHOG.shape[1]):
-
-            # Se normaliza cada valor de la imagen según la fórmula
-            # (normalizar en el intervalo [0,1] y ajustarlo al
-            # correspondiente intervalo [0,255])
-            maxHOG[i,j] = maxHOG[i,j] * 255
-
-    contadorx = 0
-    contadory = 0
-
-    for i in range (maxHOG.shape[0]):
-        for j in range (maxHOG.shape[1]):
-
-            for k in range (11):
-                for l in range (11):
-                    indx = 11*i + k
-                    indy = 11*j + l
-
-                    energy[indx, indy] = simple_energy[indx, indy] / maxHOG[i,j]
-#                    energy[indx, indy] = i*j
-
-#    for i in range(image.shape[0]):
-#        for j in range(image.shape[1]):
-#            if i-5<0: inicio_i=0
-#            else: inicio_i = i-5
-#            if i+6>image.shape[0]: fin_i = image.shape[0]
-#            else: fin_i = i+6
+    bins = bins.max(axis=0)
+    print(bins.shape)
+#    for i in range(hogg.shape[0]):
+#        for j in range(hogg.shape[1]):
 #
-#            if j-5<0: inicio_j=0
-#            else: inicio_j = j-5
-#            if j+6>image.shape[0]: fin_j = image.shape[1]
-#            else: fin_j = j+6
-#
-#            window = image[inicio_i:fin_i,inicio_j:fin_j]
-#            print(np.array(window).shape)
-#            hogg = hog(img, orientations = 9)
-#            maxHOG[i,j] = max(hogg)
+#            # Multiplicamos por 255 para "desnormalización"
+#            maxHOG[i,j] = max(hogg[i,j,0,0]) * 255
 
-    return energy.astype(np.uint8)#, simple_energy/maxHOG,
 
-#def forwardEnergy(image):
-#    n, m = image.shape[:2]
-#
-#    energy = np.zeros((n,m))
-#    M = np.zeros((n,m))
-#
-#    U = np.roll(image, 1, axis=0)
-#    L = np.roll(image, 1, axis=1)
-#    r = np.roll(image, -1, axis=1 )
-#
-#
 
-# Costura óptima vertical
-def verticalSeam (image):
+    # Calculamos eHOG
+    for i in range (bins.shape[0]):
 
-    n = image.shape[0]
-    m = image.shape[1]
+        for k in range (11):
+            for l in range (11):
+                indx = 11*i + k
+                indy = 11*i + l
 
-    energy = simpleEnergy(image)
+                energy[indx, indy] = simple_energy[indx, indy] / bins[i]
 
-    M = energy.copy()  # Matriz para la energía acumulativa mínima
+    return energy.astype(np.uint8)
 
-    # Recorremos la imagen desde la segunda fila hasta la última
-    for i in range (1, n):
+def crearCamino (M):
 
-        if m > 1:
+    n, m = M.shape[:2]
 
-            M[i,0] = energy[i,0] + min(M[i-1, 0], M[i-1,1])
-
-        else:
-            M[i,0] = energy[i,0] + M[i-1, 0]
-
-        for j in range (1, m-1):
-
-            M[i,j] = energy[i,j] + min(M[i-1,j-1], M[i-1,j], M[i-1,j+1])
-
-        M[i,m-1] = energy[i,m-1] + min(M[i-1, m-2], M[i-1,m-1])
-
-    min_ind = np.argmin(M[n-1])
-
-    camino = [np.argmin(M[n-1])]
+    camino = [np.argmin(M[-1])] # Array de m elementos
 
     # Camino de la costura, buscando la menor energía posible
     for i in range (1, n):
@@ -181,190 +115,261 @@ def verticalSeam (image):
 
         camino.append(min_ind)
 
-    return M[n-1, min_ind], min_ind, camino
+    return camino
 
+def forwardEnergy(image):
 
+    n, m = image.shape[:2]
+
+    energy = np.zeros((n,m))
+    M = np.zeros((n,m))
+
+    img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY).astype(np.float64)
+
+#    img = cv2.copyMakeBorder(img, top=1, bottom=0, left=1, right=1, borderType=cv2.BORDER_REPLICATE)
+
+    U = np.roll(img, 1, axis=0)
+    L = np.roll(img, 1, axis=1)
+    R = np.roll(img, -1, axis=1 )
+
+    cU = np.abs(R - L)
+    cL = np.abs(U - L) + cU
+    cR = np.abs(U - R) + cU
+
+#    cU = cU[1:, 1:-1]
+#    cL = cL[1:, 1:-1]
+#    cR = cR[1:, 1:-1]
+
+    M[0] = cU[0]
+
+    for i in range(1, n):
+
+        mU = M[i-1]
+        mL = np.roll(mU, 1)
+        mR = np.roll(mU, -1)
+
+        # M(x,y) = min {M(x-1,y-1) + CL(x,y)
+        #               M(x,y-1) + CU(x,y)
+        #               M(x+1,y+1) + CR(x,y)}
+
+        mLUR = np.array([mL, mU, mR])
+        cLUR = np.array([cL[i], cU[i], cR[i]])
+        mLUR += cLUR
+
+        argmins = np.argmin(mLUR, axis=0)
+        M[i] = np.choose(argmins, mLUR)
+        energy[i] = np.choose(argmins, cLUR)
+
+    # Devolvemos energía para crear el camino que implique una menor energía final (después de eliminar o añadir)
+    return (energy)
+
+# Costura óptima vertical
+def verticalSeam (image, funcion):
+
+    n, m = image.shape[:2]
+
+    energy = funcion(image)
+
+    M = energy.copy()  # Matriz para la energía acumulativa mínima
+
+    # Recorremos la imagen desde la segunda fila hasta la última
+    for i in range (1, n):
+
+        if m > 1:
+
+            M[i,0] = energy[i,0] + min(M[i-1, 0], M[i-1,1])
+
+        else:
+            M[i,0] = energy[i,0] + M[i-1, 0]
+
+        for j in range (1, m-1):
+
+            M[i,j] = energy[i,j] + min(M[i-1,j-1], M[i-1,j], M[i-1,j+1])
+
+        M[i,m-1] = energy[i,m-1] + min(M[i-1, m-2], M[i-1,m-1])
+
+    return crearCamino (M)
 
 # Costura óptima vertical
 def horizontalSeam (image):
 
-    n = image.shape[0]
-    m = image.shape[1]
+    return verticalSeam(image)
 
-    energy = simpleEnergy(image)
-
-    M = energy.copy()  # Matriz para la energía acumulativa mínima
-
-    # Recorremos la imagen desde la segunda columna hasta la última
-    for j in range (1, m):
-
-        if n > 1:
-            M[0,j] = energy[0,j] + min(M[0, j-1], M[1,j-1])
-
-        else:
-            M[0,j] = energy[0,j] + M[0, j-1]
-
-        for i in range (1, n-1):
-
-            M[i,j] = energy[i,j] + min(M[i-1,j-1], M[i,j-1], M[i+1,j-1])
-
-        M[n-1,j] = energy[n-1,j] + min(M[n-2, j-1], M[n-1,j-1])
-
-    min_ind = np.argmin(M[:,m-1])
-
-    camino = [np.argmin(M[:,m-1])]
-
-    # Camino de la costura, buscando la menor energía posible
-    for j in range (1, m):
-
-        indx = camino[-1]
-
-        min_ind = indx
-        min_value = M[indx, m - j - 1]
-
-        if (indx - 1) > -1 and min_value > M[indx - 1, m - j - 1]:
-
-            min_ind = indx - 1
-            min_value = M[indx - 1, m - j - 1]
-
-        if (indx + 1) < n and min_value > M[indx + 1, m - j - 1]:
-
-            min_ind = indx + 1
-            min_value = M[indx + 1, m - j - 1]
-
-        camino.append(min_ind)
-
-    return M[min_ind, m-1], min_ind, camino
+#    n = image.shape[0]
+#    m = image.shape[1]
+#
+#    energy = simpleEnergy(image)
+#
+#    M = energy.copy()  # Matriz para la energía acumulativa mínima
+#
+#    # Recorremos la imagen desde la segunda columna hasta la última
+#    for j in range (1, m):
+#
+#        if n > 1:
+#            M[0,j] = energy[0,j] + min(M[0, j-1], M[1,j-1])
+#
+#        else:
+#            M[0,j] = energy[0,j] + M[0, j-1]
+#
+#        for i in range (1, n-1):
+#
+#            M[i,j] = energy[i,j] + min(M[i-1,j-1], M[i,j-1], M[i+1,j-1])
+#
+#        M[n-1,j] = energy[n-1,j] + min(M[n-2, j-1], M[n-1,j-1])
+#
+#    min_ind = np.argmin(M[:,m-1])
+#
+#    camino = [np.argmin(M[:,m-1])]
+#
+#    # Camino de la costura, buscando la menor energía posible
+#    for j in range (1, m):
+#
+#        indx = camino[-1]
+#
+#        min_ind = indx
+#        min_value = M[indx, m - j - 1]
+#
+#        if (indx - 1) > -1 and min_value > M[indx - 1, m - j - 1]:
+#
+#            min_ind = indx - 1
+#            min_value = M[indx - 1, m - j - 1]
+#
+#        if (indx + 1) < n and min_value > M[indx + 1, m - j - 1]:
+#
+#            min_ind = indx + 1
+#            min_value = M[indx + 1, m - j - 1]
+#
+#        camino.append(min_ind)
+#
+#    return M[min_ind, m-1], min_ind, camino
 
 # Para eliminar los píxeles seleccionados en el camino de la costura simplemente
 # desplazo la fila hacia arriba o la columna a la izquierda y elimino la última
 # fila/columna
-def removeSeam (image, camino, vertical):
+def removeSeam (image, camino):
 
-    n = image.shape[0]
-    m = image.shape[1]
+    n, m = image.shape[:2]
 
-    if vertical:
+#    if vertical:
 
-        for i in range (0, n):
+    for i in range (0, n):
 
-            for j in range (camino[i], m - 1):
-                image[n - i - 1, j] = image[n - i - 1, j + 1]
+        for j in range (camino[i], m - 1):
+            image[n - i - 1, j] = image[n - i - 1, j + 1]
 
-        return np.delete(image, -1, 1)
+    return np.delete(image, -1, 1)
 
     # Horizontal
-    for i in range (0, m):
-
-        for j in range (camino[i], n - 1):
-            image[j, m - i - 1] = image[j + 1, m - i - 1]
-
-    return np.delete(image, -1, 0)
+#    for i in range (0, m):
+#
+#        for j in range (camino[i], n - 1):
+#            image[j, m - i - 1] = image[j + 1, m - i - 1]
+#
+#    return np.delete(image, -1, 0)
 
 # Para añadir píxeles a la imagen, hago los promedios con el vecino derecho y el
 # vecino izquierdo (o el de arriba y abajo, si es una costura horizontal)
-def addSeam (image, camino, vertical):
+def addSeam (image, camino):
 
-    n = image.shape[0]
-    m = image.shape[1]
+    n, m = image.shape[:2]
 
-    if vertical:
+#    if vertical:
 
         # Nuevo tamaño de la imagen (Seguramente sea mejor añadirle una columna
         # de 0 que crear una nueva matriz)
         # Como hay que añadir píxeles, podría añadirsele una columna al final y
         # recorer desde el final, modificando solo los píxeles que hay que hay
         # que desplazar y modificar (la costura)
-        img = np.empty((n, m + 1, 3), dtype=np.float)
-
-        image = image.astype(np.float)
-
-        for i in range (0, n):
-
-            # La parte de la imagen que se mantiene intacta
-            for j in range (0, camino[i]):
-                img[n - i - 1, j] = image[n - i - 1, j]
-
-            # Se comprueba si el píxel está en el borde, si está, no se hace el
-            # promedio, se añade el nuevo pixel a la derecha, haciendo el promedio
-            # con el vecino de la derecha
-            if camino[i] > 0:
-                left = image[n - i - 1, camino[i] - 1] * image[n - i - 1, camino[i] - 1]
-                center = image[n - i - 1, camino[i]] * image[n - i - 1, camino[i]]
-
-                new = (left + center)/2
-                new = np.sqrt(new)
-
-                img[n - i - 1, camino[i]] = new
-
-            else:
-                img[n - i - 1, camino[i]] = image[n - i - 1, camino[i]]
-
-            # Si está en el borde derecho, se hizo el promedio con el vecino izquierdo
-            # y se añadió el nuevo píxel. El pixel de la costura se mantiene igual
-            if camino[i] < (m - 1):
-                center = image[n - i - 1, camino[i]] * image[n - i - 1, camino[i]]
-                right = image[n - i - 1, camino[i] + 1] * image[n - i - 1, camino[i] + 1]
-
-                new = (center + right)/2
-                new = np.sqrt(new)
-
-                img[n - i - 1, camino[i] + 1] = new
-
-            else:
-                img[n - i - 1, camino[i] + 1] = image[n - i - 1, camino[i]]
-
-            # Se copia el resto de la imagen
-            for j in range (camino[i] + 1, m):
-                img[n - i - 1, j + 1] = image[n - i - 1, j]
-
-        img = img.astype(np.uint8)
-
-        return img
-
-    # Espejo de lo anterior para las costuras horizontales. Hay que reducirlo.
-    img = np.empty((n + 1, m, 3), dtype=np.float)
+    img = np.empty((n, m + 1, 3), dtype=np.float)
 
     image = image.astype(np.float)
 
-    for i in range (0, m):
+    for i in range (0, n):
 
+        # La parte de la imagen que se mantiene intacta
         for j in range (0, camino[i]):
-            img[j, m - i - 1] = image[j, m - i - 1]
+            img[n - i - 1, j] = image[n - i - 1, j]
 
+        # Se comprueba si el píxel está en el borde, si está, no se hace el
+        # promedio, se añade el nuevo pixel a la derecha, haciendo el promedio
+        # con el vecino de la derecha
         if camino[i] > 0:
-            up = image[camino[i] - 1, m - i - 1] * image[camino[i] - 1, m - i - 1]
+            left = image[n - i - 1, camino[i] - 1] * image[n - i - 1, camino[i] - 1]
+            center = image[n - i - 1, camino[i]] * image[n - i - 1, camino[i]]
 
-            center = image[camino[i], m - i - 1] * image[camino[i], m - i - 1]
-
-            new = (up + center)/2
+            new = (left + center)/2
             new = np.sqrt(new)
 
-            img[camino[i], m - i - 1] = new
+            img[n - i - 1, camino[i]] = new
 
         else:
-            img[camino[i], m - i - 1] = image[camino[i], m - i - 1]
+            img[n - i - 1, camino[i]] = image[n - i - 1, camino[i]]
 
-        if camino[i] < (n - 1):
-            center = image[camino[i], m - i - 1] * image[camino[i], m - i - 1]
+        # Si está en el borde derecho, se hizo el promedio con el vecino izquierdo
+        # y se añadió el nuevo píxel. El pixel de la costura se mantiene igual
+        if camino[i] < (m - 1):
+            center = image[n - i - 1, camino[i]] * image[n - i - 1, camino[i]]
+            right = image[n - i - 1, camino[i] + 1] * image[n - i - 1, camino[i] + 1]
 
-            down = image[camino[i] + 1, m - i - 1] * image[camino[i] + 1, m - i - 1]
-
-            new = (center + down)/2
-
+            new = (center + right)/2
             new = np.sqrt(new)
 
-            img[camino[i] + 1, m - i - 1] = new
+            img[n - i - 1, camino[i] + 1] = new
 
         else:
-            img[camino[i] + 1, m - i - 1] = image[camino[i], m - i - 1]
+            img[n - i - 1, camino[i] + 1] = image[n - i - 1, camino[i]]
 
-        for j in range (camino[i] + 1, n):
-            img[j + 1, m - i - 1] = image[j, m - i - 1]
+        # Se copia el resto de la imagen
+        for j in range (camino[i] + 1, m):
+            img[n - i - 1, j + 1] = image[n - i - 1, j]
 
     img = img.astype(np.uint8)
 
     return img
+
+    # Espejo de lo anterior para las costuras horizontales. Hay que reducirlo.
+#    img = np.empty((n + 1, m, 3), dtype=np.float)
+#
+#    image = image.astype(np.float)
+#
+#    for i in range (0, m):
+#
+#        for j in range (0, camino[i]):
+#            img[j, m - i - 1] = image[j, m - i - 1]
+#
+#        if camino[i] > 0:
+#            up = image[camino[i] - 1, m - i - 1] * image[camino[i] - 1, m - i - 1]
+#
+#            center = image[camino[i], m - i - 1] * image[camino[i], m - i - 1]
+#
+#            new = (up + center)/2
+#            new = np.sqrt(new)
+#
+#            img[camino[i], m - i - 1] = new
+#
+#        else:
+#            img[camino[i], m - i - 1] = image[camino[i], m - i - 1]
+#
+#        if camino[i] < (n - 1):
+#            center = image[camino[i], m - i - 1] * image[camino[i], m - i - 1]
+#
+#            down = image[camino[i] + 1, m - i - 1] * image[camino[i] + 1, m - i - 1]
+#
+#            new = (center + down)/2
+#
+#            new = np.sqrt(new)
+#
+#            img[camino[i] + 1, m - i - 1] = new
+#
+#        else:
+#            img[camino[i] + 1, m - i - 1] = image[camino[i], m - i - 1]
+#
+#        for j in range (camino[i] + 1, n):
+#            img[j + 1, m - i - 1] = image[j, m - i - 1]
+#
+#    img = img.astype(np.uint8)
+#
+#    return img
 
 # Buscamos el orden en el que hay que aplicar las costuras para conseguir una
 # imagen n x m -> n' x m' (fórmula 6 - página 5 del paper)
@@ -375,8 +380,7 @@ def seamsOrder (img, nn, nm):
 
     image = img.copy()
 
-    n = image.shape[0]
-    m = image.shape[1]
+    n, m = image.shape[:2]
 
     r = n - nn + 1
     c = m - nm + 1
@@ -392,13 +396,13 @@ def seamsOrder (img, nn, nm):
     # para comprobar si funcionaba
     # Rellenamos la primera columna de la tabla
     if r > 1:
-        min_energy, indx, camino = horizontalSeam(image)
+        min_energy, indx, camino = horizontalSeam(np.rot90(image, k=-1, axes=(0, 1)))
 
         T[1,0] = T[0,0] + min_energy
 
         options[1,0] = 0
 
-        image = removeSeam(image, camino, 0)
+        image = removeSeam(np.rot90(image, k=-1, axes=(0, 1)), camino)
 
         hor_image = image.copy()
 
@@ -412,7 +416,7 @@ def seamsOrder (img, nn, nm):
 
             hor_image = removeSeam(hor_image, camino, 0)
 
-        vert_image = image.copy()
+        vert_image = np.rot90(image, k=1, axes=(0, 1)).copy()
 
         for i in range (1, c):
 
@@ -431,7 +435,7 @@ def seamsOrder (img, nn, nm):
         for i in range (1, r):
 
             if c > 1:
-                hor_min, hor_indx, path = horizontalSeam(image)
+                hor_min, hor_indx, path = horizontalSeam(np.rot90(image, k=-1, axes=(0, 1)))
                 vert_min, vert_min, vert_path = verticalSeam(image)
 
                 T[i,1] = min(T[i-1,1] + hor_min, T[i, 0] + vert_min)
@@ -443,7 +447,7 @@ def seamsOrder (img, nn, nm):
 
                 for j in range (2, c-1):
 
-                    hor_min, hor_indx, hor_path = horizontalSeam(vert_image)
+                    hor_min, hor_indx, hor_path = horizontalSeam(np.rot90(vert_image, k=-1, axes=(0, 1)))
                     vert_min, vert_min, vert_path = verticalSeam(vert_image)
 
                     T[i,j] = min(T[i-1,j] + hor_min, T[i, j-1] + vert_min)
@@ -453,7 +457,7 @@ def seamsOrder (img, nn, nm):
 
                     vert_image = removeSeam(vert_image, vert_path, 1)
 
-                image = removeSeam(image, path, 0)
+                image = removeSeam(np.rot90(image, k=-1, axes=(0, 1)), path, 0)
 
         print("Shape final: ", image.shape)
         return T, options
@@ -569,6 +573,7 @@ def selectSeamsOrder (image, T, options):
     return order
 
 def scaleAndRemoveSeams (img, nn, nm):
+
     n, m = img.shape[:2]
     scale_factor = max(nn/n, nm/m)
     height = int(n * scale_factor)
@@ -576,18 +581,21 @@ def scaleAndRemoveSeams (img, nn, nm):
     dim = (width, height)
     # resize image
     resized = cv2.resize(img, dim)
+
+    resized = np.rot90(resized, k=-1, axes=(0, 1))
+
     #Eliminamos las verticales o horizontales que sobren
     for i in range(height - nn):
         a, b, path = horizontalSeam(resized)
         resized = removeSeam (resized, path, 0)
+
+    resized = np.rot90(resized, k=1, axes=(0, 1))
+
     for i in range(width - nm):
         a, b, path = verticalSeam(resized)
         resized = removeSeam(resized, path, 1)
 
     return resized
-
-
-
 
 # Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
 # de la imagen
@@ -598,8 +606,10 @@ def removeOrderSeams (img, order):
     for o in order:
 
         if o:
-            a, b, path = horizontalSeam (image)
-            image = removeSeam (image, path, 0)
+            a, b, path = horizontalSeam (np.rot90(image, k=-1, axes=(0, 1)))
+            image = removeSeam (np.rot90(image, k=-1, axes=(0, 1)), path, 0)
+
+            image = np.rot90(image, k=1, axes=(0, 1))
 
         else:
             a, b, path = verticalSeam (image)
@@ -621,8 +631,10 @@ def addOrderSeams (img, order):
             # tabla de bits para horizontal y vertical) guardando el camino que
             # le correspondería, pero se guarda de 0 a r,c y se recorre de r,c a 0,
             # por lo que los píxeles no son los mismos.
-            a, b, path = horizontalSeam (image)
+            a, b, path = horizontalSeam (np.rot90(image, k=-1, axes=(0, 1)))
             image = addSeam (image, path, 0)
+
+            image = np.rot90(image, k=1, axes=(0, 1))
 
         else:
             a, b, path = verticalSeam (image)
@@ -638,8 +650,7 @@ def addOrderSeams (img, order):
 # estaría pintando mal).
 def drawSeams(vertical_seams, horizontal_seams, image):
 
-    n = image.shape[0]
-    m = image.shape[1]
+    n, m = image.shape[:2]
 
     for x in vertical_seams:
 
@@ -661,9 +672,9 @@ def drawSeams(vertical_seams, horizontal_seams, image):
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 # Prueba de funcionamiento
-image = readImage("surfista.jpeg", 1)
-
-img = image.copy()
+#image = readImage("surfista.jpeg", 1)
+#
+#img = image.copy()
 
 
 #T, options = seamsOrder(image, image.shape[0], image.shape[1]-100)
@@ -680,8 +691,8 @@ img = image.copy()
 #cv2.imshow("costuras eliminadas", img2)
 #cv2.imshow("costuras añadidas", img1)
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
 
 #img1 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 #img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2RGB)

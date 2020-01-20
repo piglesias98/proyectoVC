@@ -123,15 +123,35 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
 
-img = SeamCarving.readImage("playa.jpg", 1)
-simple = SeamCarving.simpleEnergy(img)
-RGB = SeamCarving.simpleEnergyRGB(img)
+img = SeamCarving.readImage("arco.jpg", 1)
 
-hog1 = SeamCarving.eHOG(img, 1)
-hog2 = SeamCarving.eHOG(img, 0)
+img_v = img.copy()
+img_f = img.copy() 
 
-representar_imagenes([simple, RGB], ["simple", "RGB"])
-representar_imagenes([hog1, hog2], ["simple - eHOG", "RGB - eHOG"])
+image_v = img.copy()
+image_f = img.copy()
+
+for i in range (100):
+    
+    camino_v = SeamCarving.verticalSeam(image_v, SeamCarving.simpleEnergyRGB)
+    camino_f = SeamCarving.verticalSeam(image_f, SeamCarving.forwardEnergy)
+    img_v = SeamCarving.drawSeams ([camino_v], [], img_v)
+    img_f = SeamCarving.drawSeams ([camino_f], [], img_f)
+    
+    image_v = SeamCarving.removeSeam (image_v, camino_v)
+    image_f = SeamCarving.removeSeam (image_f, camino_f)
+
+#image = SeamCarving.eHOG (img)
+#simple = SeamCarving.simpleEnergy(img)
+#RGB = SeamCarving.simpleEnergyRGB(img)
+#
+#hog1 = SeamCarving.eHOG(img, 1)
+#hog2 = SeamCarving.eHOG(img, 0)
+#
+#representar_imagenes([simple, RGB], ["simple", "RGB"])
+representar_imagenes([img_v, img_f], ["original", "image"])
+representar_imagenes([image_v, image_f], ["original", "image"])
+
 
 
 #nn = 200
