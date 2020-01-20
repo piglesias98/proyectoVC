@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import sys
-
 import numpy as np
 
-from skimage.feature import hog
 
 import energias
 
@@ -322,30 +319,16 @@ def scaleAndCarve (img, nn, nm, accion=removeSeam, energia=energias.forwardEnerg
 
     #Eliminamos las verticales o horizontales que sobren
     for i in range(abs(height - nn)):
-        a, b, path = verticalSeam(resized, funcion)
+        a, b, path = verticalSeam(resized, energia)
         resized = accion(resized, path)
 
     resized = np.rot90(resized, k=1, axes=(0, 1))
 
     for i in range(abs(width - nm)):
-        a, b, path = verticalSeam(resized, funcion)
+        a, b, path = verticalSeam(resized, energia)
         resized = accion(resized, path)
 
     return resized
-
-def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
-
-    n, m = img.shape[:2]
-
-    if (nm - m) == 0:
-        img = np.rot90(img, k=-1, axes=(0, 1))
-
-    T, options = seamsOrder (img, nn, nm, energia)
-
-    order = selectSeamsOrder (image, T, options)
-
-    return accion(img, order, funcion=energias.forwardEnergy)
-
 
 # Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
 # de la imagen
@@ -363,6 +346,23 @@ def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
         if o: image = np.rot90(image, k=1, axes=(0, 1))
 
     return image
+
+
+def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
+
+    n, m = img.shape[:2]
+
+    if (nm - m) == 0:
+        img = np.rot90(img, k=-1, axes=(0, 1))
+
+    T, options = seamsOrder (img, nn, nm, energia)
+
+    order = selectSeamsOrder (img, T, options)
+
+    return accion(img, order, funcion=energias.forwardEnergy)
+
+
+
 
 # Similar a la anterior pero añadiendo
 def addOrderSeams (img, order, funcion):
