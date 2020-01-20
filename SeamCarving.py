@@ -51,12 +51,9 @@ def crearCamino (M):
 
     return min_value, min_ind, camino
 
-# Costura óptima vertical
-def verticalSeam (image, funcion):
+def Seam (image, energy):
 
     n, m = image.shape[:2]
-
-    energy = funcion(image)
 
     M = energy.copy()  # Matriz para la energía acumulativa mínima
 
@@ -77,6 +74,13 @@ def verticalSeam (image, funcion):
         M[i,m-1] = energy[i,m-1] + min(M[i-1, m-2], M[i-1,m-1])
 
     return crearCamino (M)
+
+# Costura óptima vertical
+def verticalSeam (image, funcion):
+
+    energy = funcion(image)
+
+    return (Seam(image, energy))
 
 # Costura óptima vertical
 def horizontalSeam (image, funcion):
@@ -300,10 +304,13 @@ def selectSeamsOrder (image, T, options):
 
     return order
 
-def scaleAndRemoveSeams (img, nn, nm, funcion=energias.forwardEnergy):
+def scaleAndCarve (img, nn, nm, accion=removeSeam, energia=energias.forwardEnergy):
 
     n, m = img.shape[:2]
-    scale_factor = max(nn/n, nm/m)
+
+    if accion == removeSeam: scale_factor = max(nn/n, nm/m)
+    else: scale_factor = min(nn/n, nm/m)
+
     height = int(n * scale_factor)
     width = int (m * scale_factor)
     dim = (width, height)
@@ -314,17 +321,31 @@ def scaleAndRemoveSeams (img, nn, nm, funcion=energias.forwardEnergy):
     resized = np.rot90(resized, k=-1, axes=(0, 1))
 
     #Eliminamos las verticales o horizontales que sobren
-    for i in range(height - nn):
+    for i in range(abs(height - nn)):
         a, b, path = verticalSeam(resized, funcion)
-        resized = removeSeam (resized, path, 0)
+        resized = accion(resized, path)
 
     resized = np.rot90(resized, k=1, axes=(0, 1))
 
-    for i in range(width - nm):
+    for i in range(abs(width - nm)):
         a, b, path = verticalSeam(resized, funcion)
-        resized = removeSeam(resized, path, 1)
+        resized = accion(resized, path)
 
     return resized
+
+def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
+
+    n, m = img.shape[:2]
+
+    if (nm - m) == 0:
+        img = np.rot90(img, k=-1, axes=(0, 1))
+
+    T, options = seamsOrder (img, nn, nm, energia)
+
+    order = selectSeamsOrder (image, T, options)
+
+    return accion(img, order, funcion=energias.forwardEnergy)
+
 
 # Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
 # de la imagen
@@ -344,7 +365,7 @@ def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
     return image
 
 # Similar a la anterior pero añadiendo
-def addOrderSeams (img, order):
+def addOrderSeams (img, order, funcion):
 
     image = img.copy()
 
@@ -395,3 +416,29 @@ def drawSeams(vertical_seams, horizontal_seams, image):
             image[y[j], m - j - 1, 2] = 255
 
     return image
+
+def removeEnergy(energy, mask):
+
+    n, m = energy.shape[:2]
+
+    for i in range (n):
+        for j in range (m):
+
+            if mask[i,j] < 255:
+                energy[i,j] = -100
+
+    return energy
+
+def preserveEnergy(energy, mask):
+
+    n, m = energy.shape[:2]
+
+    maxi = energy.max() + 1000
+
+    for i in range (n):
+        for j in range (m):
+
+            if mask[i,j] < 255:
+                energy[i,j] = maxi
+
+    return energy
