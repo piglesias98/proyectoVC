@@ -170,7 +170,7 @@ dif = maxi - mini
 
 for i in range (0, (mascara.shape)[0]):
     for j in range (0, (mascara.shape)[1]):
-            
+
             if mascara[i,j] > 243:
                 mascara[i,j] = 1
 
@@ -179,17 +179,17 @@ for i in range (0, (mascara.shape)[0]):
 #image = image.astype(np.uint8)
 
 for i in range (200):
-    
+
     energia = energias.forwardEnergy(img)
-    
+
     energia = energia * mascara
-    
+
     camino = verticalSeam(img, energia)
-    
+
 #    image = SeamCarving.drawSeams ([camino], [], image)
     img = SeamCarving.removeSeam (img, camino)
     mascara = SeamCarving.removeSeam (mascara, camino)
-    
+
 
 #image = image.astype(np.uint8)
 representar_imagenes([img], ["edit"])
