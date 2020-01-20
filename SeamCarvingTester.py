@@ -146,9 +146,18 @@ def verticalSeam (image, energy):
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
 
-img = SeamCarving.readImage("perro.jpg", 1)
-#img = img.astype(np.float)
-mascara = SeamCarving.readImage("mascara_perro.jpg", 0)
+img = SeamCarving.readImage("friends.jpg", 1)
+mascara = SeamCarving.readImage("mascara_friends.jpg", 0)
+
+#n, m = img.shape[:2]
+#scale_factor = 0.5
+#height = int(n * scale_factor)
+#width = int (m * scale_factor)
+#dim = (width, height)
+#
+#img = cv2.resize(img, dim)
+#mascara = cv2.resize(mascara, dim)
+
 mascara = mascara.astype(np.float)
 
 mascara2 = mascara.copy()
@@ -169,7 +178,7 @@ for i in range (0, (mascara.shape)[0]):
 
 #image = image.astype(np.uint8)
 
-for i in range (50):
+for i in range (200):
     
     energia = energias.forwardEnergy(img)
     
