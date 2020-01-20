@@ -5,7 +5,6 @@ Created on Sat Jan 18 13:38:44 2020
 @author: Paula
 """
 import cv2
-import sys
 
 import numpy as np
 
@@ -54,6 +53,8 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 
 
 
+
+
 # Prueba de funcionamiento
 
 
@@ -70,12 +71,12 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #            else: inicio_i = i-100
 #            if i+101>image.shape[0]: fin_i = image.shape[0]
 #            else: fin_i = i+101
-#            
+#
 #            if j-100<0: inicio_j=0
 #            else: inicio_j = j-5
 #            if j+101>image.shape[0]: fin_j = image.shape[1]
 #            else: fin_j = j+101
-#            
+#
 #            window = image[inicio_i:fin_i,inicio_j:fin_j]
 #            imagenes.append(window)
 #            titulos.append("windo2")
@@ -103,12 +104,12 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #        else: inicio_i = i-1
 #        if i+2>matriz.shape[0]: fin_i = matriz.shape[0]
 #        else: fin_i = i+2
-#        
+#
 #        if j-1<0: inicio_j=0
 #        else: inicio_j = j-1
 #        if j+2>matriz.shape[0]: fin_j = matriz.shape[1]
 #        else: fin_j = j+2
-#        
+#
 #        a = matriz[inicio_i:fin_i,inicio_j:fin_j]
 #        maximos[i,j] = np.max(a)
 #        print("ventana", a)
@@ -120,7 +121,42 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
+<<<<<<< HEAD
 #img = SeamCarving.readImage("playa.jpg", 1)
+=======
+
+#img = SeamCarving.readImage("arco.jpg", 1)
+#
+#img_v = img.copy()
+#img_f = img.copy() 
+#
+#image_v = img.copy()
+#image_f = img.copy()
+#
+#for i in range (100):
+#    
+#    camino_v = SeamCarving.verticalSeam(image_v, SeamCarving.simpleEnergyRGB)
+#    camino_f = SeamCarving.verticalSeam(image_f, SeamCarving.forwardEnergy)
+#    img_v = SeamCarving.drawSeams ([camino_v], [], img_v)
+#    img_f = SeamCarving.drawSeams ([camino_f], [], img_f)
+#    
+#    image_v = SeamCarving.removeSeam (image_v, camino_v)
+#    image_f = SeamCarving.removeSeam (image_f, camino_f)
+#
+##image = SeamCarving.eHOG (img)
+##simple = SeamCarving.simpleEnergy(img)
+##RGB = SeamCarving.simpleEnergyRGB(img)
+##
+##hog1 = SeamCarving.eHOG(img, 1)
+##hog2 = SeamCarving.eHOG(img, 0)
+##
+##representar_imagenes([simple, RGB], ["simple", "RGB"])
+#representar_imagenes([img_v, img_f], ["original", "image"])
+#representar_imagenes([image_v, image_f], ["original", "image"])
+
+
+
+>>>>>>> Laura-DEV
 #nn = 200
 #nm = 400
 #
@@ -185,8 +221,10 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #img2 = SeamCarving.scaleAndRemoveSeams(image, 200, 400)
 #img1 = SeamCarving.removeOrderSeams (img, order)
 #
+
 #
 #representar_imagenes([img1, img2],["sin scale", "con scale"],1)
+<<<<<<< HEAD
 #    
 #from skimage.feature import hog
 #
@@ -221,3 +259,27 @@ representar_imagenes([eHOG], ["hog"])
 #a = np.array(a)
 #minimos = a.min(axis=1)
 #print(minimos)
+=======
+
+
+mask = SeamCarving.readImage("mask.jpg", 0)
+h, w = SeamCarving.maskSize(mask)
+print(h,w)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> Laura-DEV
