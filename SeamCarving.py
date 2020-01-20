@@ -22,6 +22,14 @@ def readImage (filename, flagColor = 1):
 
     return image
 
+def maskSize(mask):
+    rows, cols = np.where(mask < 200)
+    height = np.amax(rows) - np.amin(rows) + 1
+    width = np.amax(cols) - np.amin(cols) + 1
+    return height, width
+
+
+
 #Prueba
 # Duda en la energía, creo que la energía simple es así (fórmula 1 - página 3
 # del paper). No estoy segura de los parámetros (tamaño del kernel)
