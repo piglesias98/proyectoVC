@@ -3,7 +3,6 @@
 import cv2
 import numpy as np
 
-
 import energias
 
 # Leer la imagen de entrada
@@ -360,9 +359,6 @@ def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy)
     order = selectSeamsOrder (img, T, options)
 
     return accion(img, order, funcion=energias.forwardEnergy)
-
-
-
 
 # Similar a la anterior pero añadiendo
 def addOrderSeams (img, order, funcion):
