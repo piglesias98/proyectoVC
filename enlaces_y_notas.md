@@ -36,3 +36,6 @@ http://cs.brown.edu/courses/cs129/results/proj3/taox/
 
 Explicación + implementación básica
 https://karthikkaranth.me/blog/implementing-seam-carving-with-python/
+
+Imagenes
+https://www.flickr.com/search/?text=pisa
