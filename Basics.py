@@ -51,7 +51,6 @@ def maskSize(mask):
     width = np.amax(cols) - np.amin(cols) + 1
     return height, width
 
-
 '''
 Crea el camino de seamns en función de las energías
 '''
@@ -85,7 +84,6 @@ def crearCamino (M):
 
     return min_value, min_ind, camino
 
-
 '''
 Devuelve el camino creado por la matriz M
 
@@ -116,7 +114,6 @@ def Seam (image, energy):
 
     return crearCamino (M)
 
-
 '''
 Costura óptima vertical
 
@@ -124,17 +121,17 @@ image: imagen
 funcion: función que calcula la energía
 mask: mascara que se multiplica con energía
 '''
-def verticalSeam (image, funcion, remove_mask=None, preserve_mask=None):
+def verticalSeam (image, funcion, remove_mask=None, preserve_mask=None, rmask=False, pmask=False):
+
     energy = funcion(image)
 
-    if remove_mask.all() != None and remove_mask != None:
+    if rmask:
         energy= removeEnergy(energy, remove_mask)
 
-    if preserve_mask.all() != None and preserve_mask != None:
+    if pmask:
         energy= preserveEnergy(energy, preserve_mask)
 
     return (Seam(image, energy))
-
 
 '''
 Costura óptima horizontal
@@ -142,11 +139,15 @@ Costura óptima horizontal
 image: imagen
 funcion: función que calcula la energía
 '''
-def horizontalSeam (image, funcion, remove_mask=None, preserve_mask=None):
+def horizontalSeam (image, funcion, remove_mask=None, preserve_mask=None, rmask=False, pmask=False):
 
-    return verticalSeam(np.rot90(image, k=-1, axes=(0, 1)), funcion, np.rot90(remove_mask, k=-1, axes=(0, 1)), np.rot90(preserve_mask, k=-1, axes=(0, 1)))
+    if rmask:
+         remove_mask = np.rot90(remove_mask, k=-1, axes=(0, 1))
 
+    if pmask:
+        preserve_mask = np.rot90(preserve_mask, k=-1, axes=(0, 1))
 
+    return verticalSeam(np.rot90(image, k=-1, axes=(0, 1)), funcion, remove_mask, preserve_mask, rmask, pmask)
 
 '''
 Elimina una seam
@@ -183,9 +184,6 @@ def addSeam (image, camino):
 
     # Nuevo tamaño de la imagen (Seguramente sea mejor añadirle una columna
     # de 0 que crear una nueva matriz)
-    # Como hay que añadir píxeles, podría añadirsele una columna al final y
-    # recorer desde el final, modificando solo los píxeles que hay que hay
-    # que desplazar y modificar (la costura)
     img = np.empty((n, m + 1, 3), dtype=np.float)
 
     image = image.astype(np.float)
@@ -233,7 +231,6 @@ def addSeam (image, camino):
 
     return img
 
-
 '''
 Calcula el orden para añadir/eliminar seams
 
@@ -247,9 +244,10 @@ image: imagen
 nn: nuevo tamaño de filas
 nm: nuevo tamaño de columnas
 funcion: función de energía que se utiliza (por defecto forwardEnergy)
-'''
 
-# HAY QUE COMPROBAR QUE SE QUIERA ELIMINAR AL MENOS UNA COLUMNA, SI NO, GIRAR LA IMAGEN
+PRE: Se tiene que poder eliminar, al menos, una columna (aunque no se quiera
+     eliminar ninguna fila)
+'''
 def seamsOrder (img, nn, nm, funcion=energias.forwardEnergy):
 
     image = img.copy()
@@ -334,151 +332,7 @@ def seamsOrder (img, nn, nm, funcion=energias.forwardEnergy):
 
     return T, options
 
-
-
-'''
-Calcula el orden para añadir/eliminar seams con MASK
-
-Buscamos el orden en el que hay que aplicar las costuras para conseguir una
-imagen n x m -> n' x m' (fórmula 6 - página 5 del paper)
-Primero he supuesto que solo vamos a reducir imágenes, para ampliar, en vez
-de eliminar habría que duplicar los píxeles promediando con los vecinos que
-no estén en el camino de la costura
-
-image: imagen
-nn: nuevo tamaño de filas
-nm: nuevo tamaño de columnas
-funcion: función de energía que se utiliza (por defecto forwardEnergy)
-'''
-# HAY QUE COMPROBAR QUE SE QUIERA ELIMINAR AL MENOS UNA COLUMNA, SI NO, GIRAR LA IMAGEN
-def seamsOrder (img, nn, nm, funcion=energias.forwardEnergy, remove_mask=None, preserve_mask=None):
-
-    image = img.copy()
-
-    n, m = image.shape[:2]
-
-    r = n - nn + 1
-    c = m - nm + 1
-
-    T = np.zeros((r,c))
-
-    options = np.zeros((r,c))
-
-
-    options[0,0] = -1   # Si se quiere el mismo tamaño no necesitamos hacer ninguna costura
-                        # 0 -> costura horizontal ; 1 -> costura vertical
-    # Tenía problemas si solo eliminaba columnas, programé la solución más fácil
-    # para comprobar si funcionaba
-    # Rellenamos la primera columna de la tabla
-
-    min_energy, indx, camino = verticalSeam(image, funcion, remove_mask, preserve_mask)
-
-    T[0,1] = T[0,0] + min_energy
-
-    options[0,1] = 1
-
-    #Eliminarmos la seam en la imagen
-    image = removeSeam(image, camino)
-
-    #Eliminamos la seam en la máscara si no son NONE
-    if(remove_mask.all()!=None):
-        remove_mask = removeSeam(remove_mask, camino)
-    if(preserve_mask.all()!=None):
-        preserve_mask = removeSeam(preserve_mask, camino)
-
-    vert_image = image.copy()
-    vert_remove_mask = remove_mask.copy()
-    vert_preserve_mask = preserve_mask.copy()
-
-    for i in range (2, c):
-
-        min_energy, indx, camino = verticalSeam(vert_image, funcion, remove_mask, preserve_mask)
-
-        T[0,i] = T[0,i-1] + min_energy
-
-        options[0,i] = 1
-
-        #Eliminarmos la seam en la imagen
-        vert_image = removeSeam(vert_image, camino)
-
-        #Eliminamos la seam en la máscara si no son NONE
-        if(vert_remove_mask.all()!=None):
-            vert_remove_mask = removeSeam(vert_remove_mask, camino)
-        if(vert_preserve_mask.all()!=None):
-            vert_preserve_mask = removeSeam(vert_preserve_mask, camino)
-
-
-    hor_image = image.copy()
-    hor_remove_mask = remove_mask.copy()
-    hor_preserve_mask = preserve_mask.copy()
-
-    for i in range (1, r):
-
-        min_energy, indx, camino = horizontalSeam(hor_image, funcion, remove_mask, preserve_mask)
-
-        T[i,0] = T[i-1,0] + min_energy
-
-        options[i,0] = 1
-
-        #Eliminarmos la seam en la imagen
-        hor_image = np.rot90(removeSeam(np.rot90(hor_image, k=-1, axes=(0, 1)), camino, 0), k=1, axes=(0,1))
-
-        #Eliminamos la seam en la máscara si no son NONE
-        if(hor_remove_mask.all()!=None):
-            hor_remove_mask= np.rot90(removeSeam(np.rot90(hor_remove_mask, k=-1, axes=(0, 1)), camino, 0), k=1, axes=(0,1))
-        if(hor_preserve_mask.all()!=None):
-            hor_preserve_mask= np.rot90(removeSeam(np.rot90(hor_preserve_mask, k=-1, axes=(0, 1)), camino, 0), k=1, axes=(0,1))
-
-    for j in range (1, c):
-
-        if r > 1:
-            hor_min, hor_indx, hor_path = horizontalSeam(image, funcion, remove_mask, preserve_mask)
-            vert_min, vert_min, path = verticalSeam(image, funcion, remove_mask, preserve_mask)
-
-            T[1,j] = min(T[1,j-1] + hor_min, T[0,j] + vert_min)
-
-            if T[1,j] == T[0,j] + vert_min:
-                options[1,j] = 1
-
-            hor_image = image.copy()
-            hor_remove_mask = remove_mask.copy()
-            hor_preserve_mask = preserve_mask.copy()
-
-            for i in range (2, r-1):
-
-                hor_min, hor_indx, hor_path = horizontalSeam(hor_image, funcion, remove_mask, preserve_mask)
-                vert_min, vert_min, vert_path = verticalSeam(hor_image, funcion, remove_mask, preserve_mask)
-
-                T[i,j] = min(T[i-1,j] + hor_min, T[i, j-1] + vert_min)
-
-                if T[i,j] == T[i, j-1] + vert_min:
-                    options[i,j] = 1
-
-                #Eliminamos la seam en la imagen
-                hor_image = np.rot90(removeSeam(np.rot90(hor_image, k=-1, axes=(0, 1)), hor_path, 0), k=1, axes=(0,1))
-
-                #Eliminamos la seam en la máscara si no son NONE
-                if(hor_remove_mask.all()!=None):
-                    hor_remove_mask = np.rot90(removeSeam(np.rot90(hor_remove_mask, k=-1, axes=(0, 1)), hor_path, 0), k=1, axes=(0,1))
-                if(preserve_mask.all()!=None):
-                    hor_preserve_mask = np.rot90(removeSeam(np.rot90(hor_preserve_mask, k=-1, axes=(0, 1)), hor_path, 0), k=1, axes=(0,1))
-
-
-            #Eliminamos la seam en la imagen
-            image = removeSeam(image, path, 1)
-            #Eliminamos la seam en la máscara si no son NONE
-            if(remove_mask.all()!=None):
-                remove_mask = removeSeam(remove_mask, path, 1)
-            if(preserve_mask.all()!=None):
-                preserve_mask = removeSeam(preserve_mask, path, 1)
-
-
-    return T, options
-
 # Simplemente busca el orden en el que hay que eliminar las costuras
-# Estuve fijandome que el valor que hay en la tabla de bits es el que se selecciona,
-# Creo que sería tan facil con: si es un 1, le restamos a c y guardamos el 1.
-# Si es un 0, le restamos a r y guardamos 0. Asi hasta que r y c sean 0
 def selectSeamsOrder (image, T, options):
 
     r = T.shape[0] - 1
@@ -490,7 +344,7 @@ def selectSeamsOrder (image, T, options):
     while cont < order.shape[0]:
 
         if c < 0 or r < 0:
-            print("C = %d, R = %d" % (c, r))
+            print("ERROR: C = %d, R = %d" % (c, r))
 
         if options[r,c]:
             if c > -1:
@@ -510,34 +364,6 @@ def selectSeamsOrder (image, T, options):
                 c -= 1
 
         cont += 1
-
-
-
-
-#    order[0] = options[r,c]
-#
-#    if order[0]:
-#        c -= 1
-#
-#    else:
-#        r -= 1
-#
-#    while r > 0 and c > 0:
-#
-#        if T[r, c-1] < T[r-1, c]:
-#            order[cont] = 1
-#            c -= 1
-#
-#        else:
-#            r -= 1
-#
-#        cont += 1
-#
-#    while c > -1:
-#        order[cont] = 1
-#        c -= 1
-#
-#        cont += 1
 
     return order
 
@@ -560,11 +386,11 @@ def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
 
     return image
 
-def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy, remove_mask=None, preserve_mask=None, rmask=False, pmask=False):
+def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
 
     n, m = img.shape[:2]
 
-    if accion == removeOrderSeams or accion == removeSeam: scale_factor = max(nn/n, nm/m)
+    if accion == removeOrderSeams: scale_factor = max(nn/n, nm/m)
     else: scale_factor = min(nn/n, nm/m)
 
     height = int(n * scale_factor)
@@ -574,55 +400,28 @@ def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwar
     # resize image
     resized = cv2.resize(img, dim)
 
-    if rmask != False:
-        remove_mask = cv2.resize(remove_mask, dim)
-
-    if pmask != False:
-        preserve_mask = cv2.resize(preserve_mask, dim)
-
     #Rotamos
-
     if abs(height - nn) != 0:
-        if accion == removeOrderSeams or accion == addOrderSeams:
-            order = np.ones((abs(height - nn)))
+        order = np.ones((abs(height - nn)))
 
         resized = np.rot90(resized, k=-1, axes=(0, 1))
 
-        if rmask != False:
-            remove_mask = np.rot90(remove_mask, k=-1, axes=(0, 1))
-
-        if pmask != False:
-            preserve_mask = np.rot90(preserve_mask, k=-1, axes=(0, 1))
-
     if abs(width - nm) != 0:
-        if accion == removeOrderSeams or accion == addOrderSeams:
-            order = np.ones((abs(width - nm)))
+        order = np.ones((abs(width - nm)))
 
     #Eliminamos las verticales o horizontales que sobren
-    if accion == removeOrderSeams or accion == addOrderSeams:
-        resized = accion(resized, order, energia)
+    resized = accion(resized, order, energia)
 
-    else:
-        for i in range(abs(height - nn)):
-            a, b, path = verticalSeam(resized, energia, remove_mask, preserve_mask)
-            resized = accion(resized, path)
-            remove_mask = accion(remove_mask, path)
-            preserve_mask = accion(preserve_mask, path)
-
-        for i in range(abs(width - nm)):
-            a, b, path = verticalSeam(resized, energia, remove_mask, preserve_mask)
-            resized = accion(resized, path)
-            remove_mask = accion(remove_mask, path)
-            preserve_mask = accion(preserve_mask, path)
+#    for i in range(abs(height - nn)):
+#        a, b, path = verticalSeam(resized, energia)
+#        resized = accion(resized, path)
+#
+#    for i in range(abs(width - nm)):
+#        a, b, path = verticalSeam(resized, energia)
+#        resized = accion(resized, path)
 
     if abs(height - nn) != 0:
         resized = np.rot90(resized, k=1, axes=(0, 1))
-
-        if rmask != False:
-            remove_mask = np.rot90(remove_mask, k=-1, axes=(0, 1))
-
-        if pmask != False:
-            preserve_mask = np.rot90(preserve_mask, k=-1, axes=(0, 1))
 
 
 #    resized = np.rot90(resized, k=-1, axes=(0, 1))
