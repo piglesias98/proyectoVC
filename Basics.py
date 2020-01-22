@@ -5,7 +5,7 @@ import numpy as np
 
 
 from matplotlib import pyplot as plt
-import Energias
+import energias
 
 # Leer la imagen de entrada
 # Por defecto, las imagenes se leen a color
@@ -126,10 +126,13 @@ mask: mascara que se multiplica con energía
 '''
 def verticalSeam (image, funcion, remove_mask=None, preserve_mask=None):
     energy = funcion(image)
-    if remove_mask.all() != None:
+    
+    if remove_mask.all() != None and remove_mask != None:
         energy= removeEnergy(energy, remove_mask)
-    if preserve_mask.all() != None:
+        
+    if preserve_mask.all() != None and preserve_mask != None:
         energy= preserveEnergy(energy, preserve_mask)
+        
     return (Seam(image, energy))
 
 
@@ -247,7 +250,7 @@ funcion: función de energía que se utiliza (por defecto forwardEnergy)
 '''
 
 # HAY QUE COMPROBAR QUE SE QUIERA ELIMINAR AL MENOS UNA COLUMNA, SI NO, GIRAR LA IMAGEN
-def seamsOrder (img, nn, nm, funcion=Energias.forwardEnergy):
+def seamsOrder (img, nn, nm, funcion=energias.forwardEnergy):
 
     image = img.copy()
 
@@ -541,7 +544,7 @@ def selectSeamsOrder (image, T, options):
 
 # Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
 # de la imagen
-def removeOrderSeams (img, order, funcion=Energias.forwardEnergy):
+def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
 
     image = img.copy()
 
@@ -559,7 +562,7 @@ def removeOrderSeams (img, order, funcion=Energias.forwardEnergy):
     return image
 
 
-def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=Energias.forwardEnergy):
+def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
 
     n, m = img.shape[:2]
 
@@ -633,9 +636,9 @@ def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=Energias.forwar
 
 # Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
 # de la imagen
-def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
+#def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
 
-    image = img.copy()
+#    image = img.copy()
 
     #Eliminamos las verticales o horizontales que sobren
 #    for i in range(abs(height - nn)):
@@ -650,7 +653,7 @@ def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
 
     return resized
 
-def carve (img, nn, nm, accion=removeOrderSeams, energia=Energias.forwardEnergy):
+def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
 
     n, m = img.shape[:2]
 

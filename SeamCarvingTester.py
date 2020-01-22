@@ -6,15 +6,15 @@ Created on Sat Jan 18 13:38:44 2020
 """
 
 import Basics
-import Energias
-import SeamCarving
+import energias
+import SeamsCarving
 
 img = Basics.readImage("arco.jpg", 1)
-#image = SeamCarving.contentAwareResizing (img, img.shape[0] + 5, img.shape[1] + 10, False, Energias.forwardEnergy)
+#image = SeamsCarving.contentAwareResizing (img, img.shape[0] + 5, img.shape[1] + 10, False, energias.forwardEnergy)
 
 #Basics.representar_imagenes([img, image], ["original", "editada"])
 
 image = Basics.readImage("arco.jpg", 1)
-image1 = SeamCarving.contentAwareResizing (img, img.shape[0] - 10, img.shape[1] - 5, True, Energias.forwardEnergy)
+image1 = SeamsCarving.contentAwareResizing (img, img.shape[0] - 10, img.shape[1] - 5, True, energias.forwardEnergy)
 
 Basics.representar_imagenes([image, image1], ["Sin eficiencia", "con eficiencia"])
