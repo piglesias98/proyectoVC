@@ -7,12 +7,34 @@ import numpy as np
 from matplotlib import pyplot as plt
 import energias
 
-# Leer la imagen de entrada
-# Por defecto, las imagenes se leen a color
+'''
+Lectura de imágenes
+
+Entrada:
+    -> filename: camino relativo a la imagen
+    -> flagColor: 1 -> Se lee a color ; 0 -> Se lee en escala de grises
+
+Salida:
+    -> imagen como matriz de uint8
+'''
 def readImage (filename, flagColor = 1):
 
     return cv2.imread(filename, flagColor)
 
+
+'''
+Representación de imágenes
+
+Entrada:
+    -> lista_imagen_leida: lista de imágenes que se quiere mostrar en pantalla
+    -> lista_titulos: lista de títulos para las imágenes anteriores
+    -> n_col: número de columnas en las que se van a representar las imágenes
+    -> tam: tamaño que tendrán las imágenes
+
+PRE:
+    -> El tamaño de la lista lista_imagen_leida y la de lista_titulos debe ser
+       el mismo
+'''
 def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 
     # Comprobamos que el numero de imágenes corresponde con el número de títulos pasados
@@ -45,14 +67,37 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 
 	plt.show()
 
+'''
+Número de filas y columnas que hay que eliminar para conseguir eliminar un objeto
+de la imagen, a partir de la información de su máscaras
+
+Entrada:
+    -> mask: máscara que indica que parte de la imagen se quiere terminar.
+
+Salida:
+    -> height: número de filas que se van a quitar
+    -> width: número de columnas que se van a quitar
+
+PRE: la máscara deber haberse leido en monobanda
+'''
 def maskSize(mask):
+
     rows, cols = np.where(mask < 200)
     height = np.amax(rows) - np.amin(rows) + 1
     width = np.amax(cols) - np.amin(cols) + 1
+
     return height, width
 
 '''
 Crea el camino de seamns en función de las energías
+
+Entrada:
+    -> M: matriz de energía acumulativa
+
+Salida:
+    -> min_value: mínimo valor final de energía
+    -> min_ind: índice del min_value
+    -> camino: camino de píxeles que se deben eliminar (seam)
 '''
 def crearCamino (M):
 
@@ -87,8 +132,12 @@ def crearCamino (M):
 '''
 Devuelve el camino creado por la matriz M
 
-image: imagen
-energy: matriz de energía
+Entrada:
+    -> image: imagen
+    -> energy: matriz de energía
+
+Salida:
+    -> salida de la función "crearCamino"
 '''
 def Seam (image, energy):
 
@@ -117,9 +166,17 @@ def Seam (image, energy):
 '''
 Costura óptima vertical
 
-image: imagen
-funcion: función que calcula la energía
-mask: mascara que se multiplica con energía
+Entrada:
+    -> image: imagen
+    -> funcion: función que calcula la energía
+    -> remove_mask: máscara que se multiplica con energía para eliminar un objeto
+    -> preserve_mask: máscara que se multiplica con la energía para conservar un objeto
+    -> rmask: False -> no se usa el parámetro remove_mask
+              True -> se usa el parámetro remove_mask
+    -> pmask: False -> no se usa el parámetro remove_mask
+              True -> se usa el parámetro remove_mask
+Salida:
+    -> salida de la función "Seam"
 '''
 def verticalSeam (image, funcion, remove_mask=None, preserve_mask=None, rmask=False, pmask=False):
 
@@ -136,8 +193,17 @@ def verticalSeam (image, funcion, remove_mask=None, preserve_mask=None, rmask=Fa
 '''
 Costura óptima horizontal
 
-image: imagen
-funcion: función que calcula la energía
+Entrada:
+    -> image: imagen
+    -> funcion: función que calcula la energía
+    -> remove_mask: máscara que se multiplica con energía para eliminar un objeto
+    -> preserve_mask: máscara que se multiplica con la energía para conservar un objeto
+    -> rmask: False -> no se usa el parámetro remove_mask
+              True -> se usa el parámetro remove_mask
+    -> pmask: False -> no se usa el parámetro remove_mask
+              True -> se usa el parámetro remove_mask
+Salida:
+    -> salida de la función "verticalSeam"
 '''
 def horizontalSeam (image, funcion, remove_mask=None, preserve_mask=None, rmask=False, pmask=False):
 
@@ -153,10 +219,15 @@ def horizontalSeam (image, funcion, remove_mask=None, preserve_mask=None, rmask=
 Elimina una seam
 
 Para eliminar los píxeles seleccionados en el camino de la costura simplemente
-desplazo la fila hacia arriba o la columna a la izquierda y elimino la última fila/columna
+se desplaza la columna hacia la izquierda y se elimina la última columna de la
+imagen
 
-image: imagen
-camino: seam a eliminar
+Entrada:
+    -> image: imagen
+    -> camino: seam a eliminar
+
+Salida:
+    -> imagen con seam eliminada
 '''
 def removeSeam (image, camino):
 
@@ -172,11 +243,15 @@ def removeSeam (image, camino):
 '''
 Añade una seam
 
-Para añadir píxeles a la imagen, hago los promedios con el vecino derecho y el
- vecino izquierdo (o el de arriba y abajo, si es una costura horizontal)
+Para añadir píxeles a la imagen, se hace los promedios con el vecino derecho y el
+vecino izquierdo
 
-image: imagen
-camino: seam a añadir
+Entrada:
+    -> image: imagen
+    -> camino: seam a añadir
+
+Salida:
+    -> imagen con seam duplicada
 '''
 def addSeam (image, camino):
 
@@ -232,18 +307,124 @@ def addSeam (image, camino):
     return img
 
 '''
+Elimina las seams en el orden seleccionado
+
+Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
+de la imagen
+
+Entrada:
+    -> img: imagen
+    -> order: lista de 0's y 1's que indica si se tiene que eliminar una seam
+              vertical u horizontal (0 -> horizontal ; 1 -> vertical)
+    -> funcion: funcion para calcular la energía
+
+Salida:
+    -> imagen con todas las seams eliminadas
+'''
+def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
+
+    image = img.copy()
+
+    for o in order:
+
+        if o == 0:
+            image = np.rot90(image, k=-1, axes=(0, 1))
+
+        a, b, path = verticalSeam (image, funcion)
+        image = removeSeam (image, path)
+
+        if o == 0:
+            image = np.rot90(image, k=1, axes=(0, 1))
+
+    return image
+
+'''
+Añade las semas en el orden seleccionado
+
+Función para añadir que seams se van a duplicar. Se van acumulando los caminos a
+eliminar hasta que se cambia de eje.
+
+Entrada:
+    -> img: imagen
+    -> order: lista de 0's y 1's que indica si se tiene que añadir una seam
+              vertical u horizontal (0 -> horizontal ; 1 -> vertical)
+    -> funcion: funcion para calcular la energía
+
+Salida:
+    -> imagen con todas las seams duplicada
+'''
+def addOrderSeams (img, order, funcion=energias.forwardEnergy):
+
+    image = img.copy()
+
+    aux = img.copy()
+    caminos = []
+    orden = []
+
+    anterior = order[0]
+
+    for o in order:
+
+        if o != anterior:
+
+            for i in range (len(caminos)):
+
+                if orden[i] == 0:
+                    image = np.rot90(image, k=-1, axes=(0, 1))
+
+                image = addSeam (image, caminos[i])
+
+                if orden[i] == 0:
+                    image = np.rot90(image, k=1, axes=(0, 1))
+
+            orden = []
+            caminos = []
+
+            anterior = o
+
+            aux = image.copy()
+
+        orden.append(o)
+
+        if o == 0:
+            aux = np.rot90(aux, k=-1, axes=(0, 1))
+
+        a, b, path = verticalSeam (aux, funcion)
+        aux = removeSeam (aux, path)
+
+        if o == 0:
+            aux = np.rot90(aux, k=1, axes=(0, 1))
+
+        caminos.append(path)
+
+    for i in range (len(caminos)):
+
+        if orden[i] == 0:
+            image = np.rot90(image, k=-1, axes=(0, 1))
+
+        image = addSeam (image, caminos[i])
+
+        if orden[i] == 0:
+            image = np.rot90(image, k=1, axes=(0, 1))
+
+    return image
+
+'''
 Calcula el orden para añadir/eliminar seams
 
 Buscamos el orden en el que hay que aplicar las costuras para conseguir una
 imagen n x m -> n' x m' (fórmula 6 - página 5 del paper)
-Primero he supuesto que solo vamos a reducir imágenes, para ampliar, en vez
-de eliminar habría que duplicar los píxeles promediando con los vecinos que
-no estén en el camino de la costura
 
-image: imagen
-nn: nuevo tamaño de filas
-nm: nuevo tamaño de columnas
-funcion: función de energía que se utiliza (por defecto forwardEnergy)
+Entrada:
+    -> image: imagen
+    -> nn: nuevo tamaño de filas
+    -> nm: nuevo tamaño de columnas
+    -> funcion: función de energía que se utiliza (por defecto forwardEnergy)
+
+Salida:
+    -> T: matriz de energías, eligiendo siempre la mínima de las opciones
+    -> options: matriz que guarda la opción (seam vertical u horizontal) que se
+                ha elegido como mínima para cada casilla de T
 
 PRE: Se tiene que poder eliminar, al menos, una columna (aunque no se quiera
      eliminar ninguna fila)
@@ -254,8 +435,8 @@ def seamsOrder (img, nn, nm, funcion=energias.forwardEnergy):
 
     n, m = image.shape[:2]
 
-    r = abs(n - nn + 1)
-    c = abs(m - nm + 1)
+    r = abs(n - nn) + 1
+    c = abs(m - nm) + 1
 
     T = np.zeros((r,c))
 
@@ -332,7 +513,18 @@ def seamsOrder (img, nn, nm, funcion=energias.forwardEnergy):
 
     return T, options
 
-# Simplemente busca el orden en el que hay que eliminar las costuras
+'''
+Busca el orden óptimo para eliminar las seams
+
+Entrada:
+    -> image: imagen
+    -> T: matriz de energías para cada tamaño posible
+    -> options: matriz que guarda la opción (seam vertical u horizontal) que se
+                ha elegido como mínima para cada casilla de T
+
+Salida:
+    -> Orden en el que se tienen que eliminar las seams
+'''
 def selectSeamsOrder (image, T, options):
 
     r = T.shape[0] - 1
@@ -367,25 +559,61 @@ def selectSeamsOrder (image, T, options):
 
     return order
 
-# Con el orden seleccionado, va eliminando horizontal o verticalmente las costuras
-# de la imagen
-def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
+'''
+Modifica el tamaño de la imagen de manera no eficiente
 
-    image = img.copy()
+Entrada:
+    -> img: imagen
+    -> nn: nuevo número de filas
+    -> nm: nuevo número de columnas
+    -> accion: indica si se va a eliminar o añadir seams
+    -> energia: función de energía que se va a utilizar
 
-    for o in order:
+Salida:
+    -> imagen con las nuevas dimensiones especificadas
+'''
+def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
 
-        if o == 0:
-            image = np.rot90(image, k=-1, axes=(0, 1))
+    n, m = img.shape[:2]
 
-        a, b, path = verticalSeam (image, funcion)
-        image = removeSeam (image, path)
+    r = abs(n - nn)
+    c = abs(m - nm)
+    girar = c == 0
 
-        if o == 0:
-            image = np.rot90(image, k=1, axes=(0, 1))
+    if girar:
+        img = np.rot90(img, k=-1, axes=(0, 1))
+
+    if girar or (r == 0):
+        order = np.ones((r+c))
+
+    else:
+        T, options = seamsOrder (img, nn, nm, energia)
+
+        order = selectSeamsOrder (img, T, options)
+
+    image = accion(img, order, energia)
+
+    if girar:
+        return np.rot90(image, k=1, axes=(0, 1))
 
     return image
 
+'''
+Modifica el tamaño de la imagen de manera eficiente
+
+Primero escala la imagen y después quita o añade las seams necesarias para conseguir
+el tamaño especificado
+
+Entrada:
+    -> img: imagen
+    -> nn: nuevo número de filas
+    -> nm: nuevo número de columnas
+    -> accion: indica si se va a eliminar o añadir seams
+    -> energia: función de energía que se va a utilizar
+
+Salida:
+    -> imagen con las nuevas dimensiones especificadas
+'''
 def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
 
     n, m = img.shape[:2]
@@ -452,92 +680,67 @@ def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwar
 
     return resized
 
-def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
+'''
+Modifica la matriz de energía para adaptarse a la máscara de la imagen
 
-    n, m = img.shape[:2]
+Esta función es para modificar la energía con una máscara para eliminar un objeto
 
-    r = abs(n - nn)
-    c = abs(m - nm)
-    girar = c == 0
+Entrada:
+    -> energy: matriz de energía
+    -> mask: máscara de la imagen
 
-    if girar:
-        img = np.rot90(img, k=-1, axes=(0, 1))
+Salida:
+    -> matriz de energía de la imagen modificada por la máscara
+'''
+def removeEnergy(energy, mask):
 
-    if girar or (r == 0):
-        order = np.ones((r+c))
+    n, m = energy.shape[:2]
 
-    else:
-        T, options = seamsOrder (img, nn, nm, energia)
+    for i in range (n):
+        for j in range (m):
 
-        order = selectSeamsOrder (img, T, options)
+            if mask[i,j] < 255:
+                energy[i,j] = -100
 
-    image = accion(img, order, energia)
+    return energy
 
-    if girar:
-        return np.rot90(image, k=1, axes=(0, 1))
+'''
+Modifica la matriz de energía para adaptarse a la máscara de la imagen
 
-    return image
+Esta función es para modificar la energía con una máscara para conservar un objeto
 
-# Función para añadir que seams se van a duplicar. Se van acumulando
-# los caminos a eliminar hasta que se cambia de eje.
-def addOrderSeams (img, order, funcion=energias.forwardEnergy):
+Entrada:
+    -> energy: matriz de energía
+    -> mask: máscara de la imagen
 
-    image = img.copy()
+Salida:
+    -> matriz de energía de la imagen modificada por la máscara
+'''
+def preserveEnergy(energy, mask):
 
-    aux = img.copy()
+    n, m = energy.shape[:2]
 
-    caminos = []
-    orden = []
+    maxi = energy.max() + 1000
 
-    anterior = order[0]
+    for i in range (n):
+        for j in range (m):
 
-    for o in order:
+            if mask[i,j] < 255:
+                energy[i,j] = maxi
 
-        if o != anterior:
+    return energy
 
-            for i in range (len(caminos)):
+'''
+Función para pintar las seams dn la imagen
 
-                if orden[i] == 0:
-                    image = np.rot90(image, k=-1, axes=(0, 1))
+Entrada:
+    -> vertical_seams: seams verticales que se quieren pintar
+    -> horizontal_seams: seams horizontales que se quieren pintar
+    -> image: imagen
 
-                image = addSeam (image, caminos[i])
-
-                if orden[i] == 0:
-                    image = np.rot90(image, k=1, axes=(0, 1))
-
-            orden = []
-            caminos = []
-
-            anterior = o
-
-            aux = image.copy()
-
-        orden.append(o)
-
-        if o == 0:
-            aux = np.rot90(aux, k=-1, axes=(0, 1))
-
-        a, b, path = verticalSeam (aux, funcion)
-        aux = removeSeam (aux, path)
-
-        if o == 0:
-            aux = np.rot90(aux, k=1, axes=(0, 1))
-
-        caminos.append(path)
-
-    for i in range (len(caminos)):
-
-        if orden[i] == 0:
-            image = np.rot90(image, k=-1, axes=(0, 1))
-
-        image = addSeam (image, caminos[i])
-
-        if orden[i] == 0:
-            image = np.rot90(image, k=1, axes=(0, 1))
-
-    return image
-
-# Función para pintar las seams dn la imagen
+Salida:
+    -> imagen con las seams indicadas en rojo
+'''
 def drawSeams(vertical_seams, horizontal_seams, image):
 
     n, m = image.shape[:2]
@@ -559,29 +762,3 @@ def drawSeams(vertical_seams, horizontal_seams, image):
             image[y[j], m - j - 1, 2] = 255
 
     return image
-
-def removeEnergy(energy, mask):
-
-    n, m = energy.shape[:2]
-
-    for i in range (n):
-        for j in range (m):
-
-            if mask[i,j] < 255:
-                energy[i,j] = -100
-
-    return energy
-
-def preserveEnergy(energy, mask):
-
-    n, m = energy.shape[:2]
-
-    maxi = energy.max() + 1000
-
-    for i in range (n):
-        for j in range (m):
-
-            if mask[i,j] < 255:
-                energy[i,j] = maxi
-
-    return energy
