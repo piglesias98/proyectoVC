@@ -57,7 +57,7 @@ def contentAwareResizing (img, nn, nm, efficiency=True, energy=energias.forwardE
         else:
             img = funcion(img, n, nm, accion[0], energy, draw)
 
-    return img
+    return img 
 
 '''
 Función para eliminar o conservar un objeto de una imagen

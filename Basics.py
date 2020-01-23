@@ -348,6 +348,9 @@ def removeOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
             if draw:
                 resultado = np.rot90(resultado, k=1, axes=(0, 1))
 
+    if draw:
+        return image, resultado
+    
     return image
 
 '''
@@ -604,7 +607,7 @@ Entrada:
 Salida:
     -> imagen con las nuevas dimensiones especificadas
 '''
-def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy, draw):
+def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy, draw=False):
 
     n, m = img.shape[:2]
 
@@ -646,7 +649,7 @@ Entrada:
 Salida:
     -> imagen con las nuevas dimensiones especificadas
 '''
-def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy, draw):
+def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy, draw=False):
 
     n, m = img.shape[:2]
     print("n", n, "m", m)
