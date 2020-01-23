@@ -84,31 +84,39 @@ def objectRemoval(image, remove_mask=None, preserve_mask=None, nn=0, nm=0, rmask
         nn, nm = Basics.maskSize(remove_mask)
 
     if n-nn>m-nm:   #Eliminamos las filas
+        
+        print("\n Numero de seams a eliminar: ", abs(n-nn))
         #Rotamos
-#        img = np.rot90(img, k=-1, axes=(0, 1))
-#        if remove_mask.all()!=None:
-#            remove_mask = np.rot90(remove_mask, k=-1, axes=(0, 1))
-#        if preserve_mask.all()!=None:
-#            preserve_mask = np.rot90(preserve_mask, k=-1, axes=(0, 1))
+        img = np.rot90(img, k=-1, axes=(0, 1))
+        
+        if rmask:
+            remove_mask = np.rot90(remove_mask, k=-1, axes=(0, 1))
+            
+        if pmask:
+            preserve_mask = np.rot90(preserve_mask, k=-1, axes=(0, 1))
 
         #Eliminamos las horizontales que sobren
         for i in range(abs(n - nn)):
-#            print("eliminamos", i)
-            a, b, path = Basics.horizontalSeam(img, energias.forwardEnergy, remove_mask, preserve_mask, rmask, pmask)
+            print("Eliminamos ", i)
+            a, b, path = Basics.verticalSeam(img, energias.forwardEnergy, remove_mask, preserve_mask, rmask, pmask)
+            
             img = Basics.removeSeam(img, path)
-
+            
             if rmask:
                 remove_mask = Basics.removeSeam(remove_mask, path)
-
+                
             if pmask:
                 preserve_mask = Basics.removeSeam(preserve_mask, path)
 
         #Rotamos
-#        return np.rot90(img, k=1, axes=(0, 1)
-        return img
+        return np.rot90(img, k=1, axes=(0, 1))
+#        return img
     else:
+        
+        print("\n Numero de seams a eliminar: ", abs(m-nm))
         #Eliminamos las verticales que sobren
         for i in range(abs(m - nm)):
+            print("Eliminamos", i)
             a, b, path = Basics.verticalSeam(img, energias.forwardEnergy, remove_mask, preserve_mask, rmask, pmask)
             img = Basics.removeSeam(img, path)
 

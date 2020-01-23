@@ -9,7 +9,7 @@ from skimage.feature import hog
 # -> https://medium.com/swlh/real-world-dynamic-programming-seam-carving-9d11c5b0bfca
 # -> https://avikdas.com/2019/07/29/improved-seam-carving-with-forward-energy.html
 '''
-Energía simple
+Energía simple (monobanda)
 
 Derivada en x e y de la imagen
 
@@ -31,7 +31,7 @@ def simpleEnergy (image):
     return x + y
 
 '''
-Energía simple
+Energía simple (tribanda)
 
 Calcula la energía para cada canal r g b
 
@@ -92,7 +92,7 @@ Entrada:
     -> image: imagen
 
 Salida:
-    -> Matriz de energía 
+    -> Matriz de energía
 '''
 def forwardEnergy(image):
 

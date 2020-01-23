@@ -188,7 +188,7 @@ def verticalSeam (image, funcion, remove_mask=None, preserve_mask=None, rmask=Fa
     if pmask:
         energy= preserveEnergy(energy, preserve_mask)
 
-    return (Seam(image, energy))
+    return Seam(image, energy)
 
 '''
 Costura óptima horizontal
