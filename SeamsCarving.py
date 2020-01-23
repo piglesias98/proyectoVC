@@ -35,7 +35,7 @@ def contentAwareResizing (img, nn, nm, efficiency=True, energy=energias.forwardE
     if dif_n > 0:
 
         if dif_m < 0:
-            img = funcion(img, nn, m, accion[0], energy, draw)
+            img = funcion(img, nn, m, accion[0], energy, draw=False)
             img = funcion(img, nn, nm, accion[1], energy, draw)
 
         else:
@@ -44,7 +44,7 @@ def contentAwareResizing (img, nn, nm, efficiency=True, energy=energias.forwardE
     elif dif_n < 0:
 
         if dif_m > 0:
-            img = funcion(img, n, nm, accion[0], energy, draw)
+            img = funcion(img, n, nm, accion[0], energy, draw=False)
             img = funcion(img, nn, nm, accion[1], energy, draw)
 
         else:

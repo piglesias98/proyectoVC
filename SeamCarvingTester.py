@@ -82,68 +82,52 @@ Content Aware Resizing
 
 #input("Pulse Enter para continuar")
 
-print("-------------------CONTENT AWARE RESIZING-------------------")
-
-print("Disminución en filas y columnas")
-
-arbol1_red = SeamsCarving.contentAwareResizing (arbol1, arbol1.shape[0]-20, arbol1.shape[1] - 35, efficiency=False, energy = energias.forwardEnergy, draw=True)
-arbol1_red_eff = SeamsCarving.contentAwareResizing (arbol1, arbol1.shape[0]-20, arbol1.shape[1] - 35, efficiency=True, energy = energias.forwardEnergy, draw=True)
-tit1 = "Reducción: " + "Filas = " + str(arbol1_red[0].shape[0]) + "Columnas = " + str(arbol1_red[0].shape[1])
-tit1_eff = "Reducción eficiente: " + "Filas = " + str(arbol1_red_eff[0].shape[0]) + "Columnas = " + str(arbol1_red_eff[0].shape[1])
-
-Basics.representar_imagenes([arbol1_red[0] ,arbol1_red_eff[0],
-                             arbol1_red[1], arbol1_red_eff[1]],
-                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
+#print("-------------------CONTENT AWARE RESIZING-------------------")
 #
-##input("Pulse Enter para continuar")
+#print("Disminución en filas y columnas")
+#
+#arbol1_red = SeamsCarving.contentAwareResizing (arbol1, arbol1.shape[0]-20, arbol1.shape[1] - 35, efficiency=False, energy = energias.forwardEnergy, draw=True)
+#arbol1_red_eff = SeamsCarving.contentAwareResizing (arbol1, arbol1.shape[0]-20, arbol1.shape[1] - 35, efficiency=True, energy = energias.forwardEnergy, draw=True)
+#tit1 = "Reducción: " + "Filas = " + str(arbol1_red[0].shape[0]) + "Columnas = " + str(arbol1_red[0].shape[1])
+#tit1_eff = "Reducción eficiente: " + "Filas = " + str(arbol1_red_eff[0].shape[0]) + "Columnas = " + str(arbol1_red_eff[0].shape[1])
+#
+#Basics.representar_imagenes([arbol1_red[0] ,arbol1_red_eff[0],
+#                             arbol1_red[1], arbol1_red_eff[1]],
+#                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
+
+#input("Pulse Enter para continuar")
 #print("Aumento en filas y columnas")
 #
-#campo_aum = SeamsCarving.contentAwareResizing (campo, campo.shape[0]+70, campo.shape[1]+30, efficiency=False, energy = energias.forwardEnergy, draw=True)
-#campo_aum_eff = SeamsCarving.contentAwareResizing (arbol1, campo.shape[0]+70, campo.shape[1]+30, efficiency=True, energy = energias.forwardEnergy, draw=True)
-#tit1 = "Aumento: " + "Filas = " + campo_aum[0].shape[0] + "Columnas = " + campo_aum[0].shape[1]
-#tit1_eff = "Aumento eficiente: " + "Filas = " + campo_aum_eff[0].shape[0] + "Columnas = " + campo_aum_eff[0].shape[1]
+#campo_aum = SeamsCarving.contentAwareResizing (campo, campo.shape[0]+35, campo.shape[1]+20, efficiency=False, energy = energias.forwardEnergy, draw=True)
+#campo_aum_eff = SeamsCarving.contentAwareResizing (campo, campo.shape[0]+35, campo.shape[1]+20, efficiency=True, energy = energias.forwardEnergy, draw=True)
+#tit1 = "Aumento: " + "Filas = " + str(campo_aum[0].shape[0]) + ", Columnas = " + str(campo_aum[0].shape[1])
+#tit1_eff = "Aumento eficiente: " + "Filas = " + str(campo_aum_eff[0].shape[0]) + ", Columnas = " + str(campo_aum_eff[0].shape[1])
 #
 #Basics.representar_imagenes([campo_aum[0] ,campo_aum_eff[0],
 #                             campo_aum[1], campo_aum_eff[1]],
 #                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
+
+
+#input("Pulse Enter para continuar")
+print("Aumento en filas y disminución en columnas")
+
+roca_ad = SeamsCarving.contentAwareResizing (roca, roca.shape[0]+30, roca.shape[1]-20, efficiency=False, energy = energias.forwardEnergy, draw=True)
+roca_ad_eff = SeamsCarving.contentAwareResizing (roca, roca.shape[0]+30, roca.shape[1]-20, efficiency=True, energy = energias.forwardEnergy, draw=True)
+tit1 = "Aumento: " + "Filas = " + str(roca_ad[0].shape[0]) + "Columnas = " + str(roca_ad[1].shape[0])
+tit1_eff = "Aumento eficiente: " + "Filas = " + str(roca_ad_eff[0].shape[0]) + "Columnas = " + str(roca_ad_eff[0].shape[1])
 #
+Basics.representar_imagenes([roca_ad[0] ,roca_ad_eff[0],
+                             roca_ad[1], roca_ad_eff[1]],
+                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
+
+#input("Pulse Enter para continuar")
+print("Disminución en filas y aumento en columnas")
+
+hombre_da = SeamsCarving.contentAwareResizing (hombre, hombre.shape[0]-30, hombre.shape[1]+20, efficiency=False, energy = energias.forwardEnergy, draw=True)
+hombre_da_eff = SeamsCarving.contentAwareResizing (hombre, hombre.shape[0]-30, hombre.shape[1]+20, efficiency=True, energy = energias.forwardEnergy, draw=True)
+tit1 = "Aumento: " + "Filas = " + str(hombre_da[0].shape[0]) + "Columnas = " + str(hombre_da[1].shape[0])
+tit1_eff = "Aumento eficiente: " + "Filas = " + str(hombre_da_eff[0].shape[0]) + "Columnas = " + str(hombre_da_eff[0].shape[1])
 #
-##input("Pulse Enter para continuar")
-#print("Aumento en filas y disminución en columnas")
-#roca_ad = SeamsCarving.contentAwareResizing (roca, roca.shape[0]+50, roca.shape[1]-30, efficiency=False, energy = energias.forwardEnergy, draw=True)
-#roca_ad_eff = SeamsCarving.contentAwareResizing (arbol1, roca.shape[0]+50, roca.shape[1]-30, efficiency=True, energy = energias.forwardEnergy, draw=True)
-#tit1 = "Aumento: " + "Filas = " + roca_ad[0].shape[0] + "Columnas = " + roca_ad[1].shape[0]
-#tit1_eff = "Aumento eficiente: " + "Filas = " + roca_ad_eff[0].shape[0] + "Columnas = " + roca_ad_eff[0].shape[1]
-#
-#Basics.representar_imagenes([roca_ad[0] ,roca_ad_eff[0],
-#                             roca_ad[1], roca_ad_eff[1]],
-#                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
-
-
-
-
-
-
-
-
-
-
-#image = SeamsCarving.contentAwareResizing (img, img.shape[0] + 10, img.shape[1] + 10, False, energias.forwardEnergy)
-
-#Basics.representar_imagenes([img, image], ["original", "editada"])
-
-
-#image = SeamsCarving.contentAwareResizing (campo, campo.shape[0]+40, campo.shape[1] + 10)
-
-#image = SeamsCarving.objectRemoval(img, remove_mask=mask_n, rmask=True, preserve_mask=mask_p, pmask=True)
-#
-#Basics.representar_imagenes([img, image], ["original", "sin objeto"])
-
-#Basics.representar_imagenes([campo, image], ["original", "enlarged"])
-
-
-#
-#eliminado = SeamsCarving.objectRemoval(coche, remove_mask=mask_n, rmask=True)
-#restaurado = SeamsCarving.contentAwareResizing(eliminado, coche.shape[0], coche.shape[1])
-#
-#Basics.representar_imagenes([coche, eliminado, restaurado], ["Original", "Objeto eliminado", "Restaurado"])
+Basics.representar_imagenes([hombre_da[0] ,hombre_da_eff[0],
+                             hombre_da[1], hombre_da_eff[1]],
+                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)

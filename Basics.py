@@ -392,25 +392,30 @@ def addOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
 
         if o != anterior:
 
+            
+            if orden[0] == 0:
+                image = np.rot90(image, k=-1, axes=(0, 1))
+            
             for i in range (len(caminos)):
 
-                if orden[i] == 0:
-                    image = np.rot90(image, k=-1, axes=(0, 1))
+                
 
                 image = addSeam (image, caminos[i])
                 
                 print("Seam ", cont, " aumentada")
                 cont = cont + 1
 
-                if orden[i] == 0:
-                    image = np.rot90(image, k=1, axes=(0, 1))
+            if orden[i] == 0:
+                image = np.rot90(image, k=1, axes=(0, 1))
 
             if draw:
-                if anterior:
-                    resultado = drawSeams(caminos,[],resultado)
-
-                else:
-                    resultado = drawSeams([], caminos, resultado)
+                if anterior==0:
+                    resultado = np.rot90(resultado, k=-1, axes=(0, 1))
+                resultado = drawSeams(caminos,[],resultado)
+                
+                if anterior==0:
+                     resultado = np.rot90(resultado, k=1, axes=(0, 1))
+                
 
             orden = []
             caminos = []
@@ -435,11 +440,12 @@ def addOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
     for i in range (len(caminos)):
 
         if draw:
-            if anterior:
+                if anterior==0:
+                    resultado = np.rot90(resultado, k=-1, axes=(0, 1))
                 resultado = drawSeams(caminos,[],resultado)
-
-            else:
-                resultado = drawSeams([], caminos, resultado)
+                
+                if anterior==0:
+                     resultado = np.rot90(resultado, k=1, axes=(0, 1))
 
         if orden[i] == 0:
             image = np.rot90(image, k=-1, axes=(0, 1))
@@ -643,7 +649,12 @@ def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy,
     image = accion(img, order, energia, draw)
 
     if girar:
-        return np.rot90(image, k=1, axes=(0, 1))
+        if draw:
+            reduced = np.rot90(image[0], k=1, axes=(0, 1))
+            drawed = np.rot90(image[1], k=1, axes=(0, 1))
+            return reduced, drawed
+        else:
+            return np.rot90(image, k=1, axes=(0, 1))
 
     return image
 
@@ -696,35 +707,17 @@ def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwar
 #        resized = accion(resized, path)
 
     if abs(height - nn) != 0:
-        resized = np.rot90(resized, k=1, axes=(0, 1))
+        if draw:
+            reduced = np.rot90(resized[0], k=1, axes=(0, 1))
+            drawed = np.rot90(resized[1], k=1, axes=(0, 1))
+        else:
+            resized = np.rot90(resized, k=1, axes=(0, 1))
 
 
-#    resized = np.rot90(resized, k=-1, axes=(0, 1))
-#    if remove_mask.all()!=None:
-#        remove_mask = np.rot90(remove_mask, k=-1, axes=(0, 1))
-#    if preserve_mask.all()!=None:
-#        preserve_mask = np.rot90(preserve_mask, k=-1, axes=(0, 1))
-#
-#
-#    #Eliminamos las verticales o horizontales que sobren
-#    for i in range(abs(height - nn)):
-#        a, b, path = verticalSeam(resized, energia, remove_mask, preserve_mask)
-#        resized = accion(resized, path)
-#        remove_mask = accion(remove_mask, path)
-#        preserve_mask = accion(preserve_mask, path)
-#
-#    resized = np.rot90(resized, k=1, axes=(0, 1))
-#    if remove_mask.all()!=None:
-#        remove_mask = np.rot90(remove_mask, k=1, axes=(0, 1))
-#    if preserve_mask.all()!=None:
-#        preserve_mask = np.rot90(preserve_mask, k=1, axes=(0, 1))
-#
-#    for i in range(abs(width - nm)):
-#        a, b, path = verticalSeam(resized, energia, remove_mask, preserve_mask)
-#        resized = accion(resized, path)
-#        remove_mask = accion(remove_mask, path)
-#        preserve_mask = accion(preserve_mask, path)
-
+    if draw:
+        return reduced, drawed
+    
+    
     return resized
 
 '''
