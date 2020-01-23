@@ -321,20 +321,32 @@ Entrada:
 Salida:
     -> imagen con todas las seams eliminadas
 '''
-def removeOrderSeams (img, order, funcion=energias.forwardEnergy):
+def removeOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
 
     image = img.copy()
+    
+    if draw: 
+        resultado = img.copy()
 
     for o in order:
 
         if o == 0:
             image = np.rot90(image, k=-1, axes=(0, 1))
+            
+            if draw: 
+                resultado = np.rot90(resultado, k=-1, axes=(0, 1))
 
         a, b, path = verticalSeam (image, funcion)
         image = removeSeam (image, path)
+        
+        if draw: 
+            resultado = drawSeams([path], [], resultado)
 
         if o == 0:
             image = np.rot90(image, k=1, axes=(0, 1))
+            
+            if draw: 
+                resultado = np.rot90(resultado, k=1, axes=(0, 1))
 
     return image
 
@@ -353,9 +365,12 @@ Entrada:
 Salida:
     -> imagen con todas las seams duplicada
 '''
-def addOrderSeams (img, order, funcion=energias.forwardEnergy):
+def addOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
 
     image = img.copy()
+    
+    if draw:
+        resultado = img.copy()
 
     aux = img.copy()
     caminos = []
@@ -376,6 +391,13 @@ def addOrderSeams (img, order, funcion=energias.forwardEnergy):
 
                 if orden[i] == 0:
                     image = np.rot90(image, k=1, axes=(0, 1))
+                    
+            if draw: 
+                if anterior:
+                    resultado = drawSeams(caminos,[],resultado)
+                
+                else:
+                    resultado = drawSeams([], caminos, resultado)
 
             orden = []
             caminos = []
@@ -398,6 +420,13 @@ def addOrderSeams (img, order, funcion=energias.forwardEnergy):
         caminos.append(path)
 
     for i in range (len(caminos)):
+                    
+        if draw: 
+            if anterior:
+                resultado = drawSeams(caminos,[],resultado)
+            
+            else:
+                resultado = drawSeams([], caminos, resultado)
 
         if orden[i] == 0:
             image = np.rot90(image, k=-1, axes=(0, 1))
@@ -407,6 +436,9 @@ def addOrderSeams (img, order, funcion=energias.forwardEnergy):
         if orden[i] == 0:
             image = np.rot90(image, k=1, axes=(0, 1))
 
+    if draw: 
+        return image, resultado
+    
     return image
 
 '''
@@ -572,7 +604,7 @@ Entrada:
 Salida:
     -> imagen con las nuevas dimensiones especificadas
 '''
-def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
+def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy, draw):
 
     n, m = img.shape[:2]
 
@@ -591,7 +623,7 @@ def carve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy)
 
         order = selectSeamsOrder (img, T, options)
 
-    image = accion(img, order, energia)
+    image = accion(img, order, energia, draw)
 
     if girar:
         return np.rot90(image, k=1, axes=(0, 1))
@@ -614,13 +646,13 @@ Entrada:
 Salida:
     -> imagen con las nuevas dimensiones especificadas
 '''
-def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
+def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy, draw):
 
     n, m = img.shape[:2]
 
     if accion == removeOrderSeams: scale_factor = max(nn/n, nm/m)
     else: scale_factor = min(nn/n, nm/m)
-
+    
     height = int(n * scale_factor)
     width = int (m * scale_factor)
     dim = (width, height)
@@ -638,7 +670,7 @@ def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwar
         order = np.ones((abs(width - nm)))
 
     #Eliminamos las verticales o horizontales que sobren
-    resized = accion(resized, order, energia)
+    resized = accion(resized, order, energia, draw)
 
 #    for i in range(abs(height - nn)):
 #        a, b, path = verticalSeam(resized, energia)

@@ -18,7 +18,7 @@ Entrada:
 Salida:
     -> imagen con tamaño modificado
 '''
-def contentAwareResizing (img, nn, nm, efficiency=Basics.scaleAndCarve, energy=energias.forwardEnergy):
+def contentAwareResizing (img, nn, nm, efficiency=True, energy=energias.forwardEnergy, draw=False):
 
     n, m = img.shape[:2]
 
@@ -34,28 +34,28 @@ def contentAwareResizing (img, nn, nm, efficiency=Basics.scaleAndCarve, energy=e
     if dif_n > 0:
 
         if dif_m < 0:
-            img = funcion(img, nn, m, accion[0], energy)
-            img = funcion(img, nn, nm, accion[1], energy)
+            img = funcion(img, nn, m, accion[0], energy, draw)
+            img = funcion(img, nn, nm, accion[1], energy, draw)
 
         else:
-            img = funcion(img, nn, nm, accion[0], energy)
+            img = funcion(img, nn, nm, accion[0], energy, draw)
 
     elif dif_n < 0:
 
         if dif_m > 0:
-            img = funcion(img, n, nm, accion[0], energy)
-            img = funcion(img, nn, nm, accion[1], energy)
+            img = funcion(img, n, nm, accion[0], energy, draw)
+            img = funcion(img, nn, nm, accion[1], energy, draw)
 
         else:
-            img = funcion(img, nn, m - abs(dif_m), accion[1], energy)
+            img = funcion(img, nn, nm, accion[1], energy, draw)
 
     else:
 
         if dif_m < 0:
-            img = funcion(img, nn, nm, accion[1], energy)
+            img = funcion(img, nn, nm, accion[1], energy, draw)
 
         else:
-            img = funcion(img, n, nm, accion[0], energy)
+            img = funcion(img, n, nm, accion[0], energy, draw)
 
     return img
 
@@ -66,8 +66,8 @@ Entrada:
     -> image: imagen
     -> remove_mask: máscara de la imagen para el elemento que se quiere eliminar
     -> preserve_mask: máscara de la imagen para el elemento que se quiere conservar
-    -> nn: número nuevo de filas
-    -> nm: número nuevo de columnas
+    -> nn: número filas a eliminar
+    -> nm: número columnas a eliminar
     -> rmask: False -> no se usa el parámetro remove_mask
               True -> se usa el parámetro remove_mask
     -> pmask: False -> no se usa el parámetro remove_mask
@@ -83,9 +83,9 @@ def objectRemoval(image, remove_mask=None, preserve_mask=None, nn=0, nm=0, rmask
     if rmask:
         nn, nm = Basics.maskSize(remove_mask)
 
-    if n-nn>m-nm:   #Eliminamos las filas
+    if nn < nm:   #Eliminamos las filas
         
-        print("\n Numero de seams a eliminar: ", abs(n-nn))
+        print("\nNumero de seams horizontales a eliminar: ", nn)
         #Rotamos
         img = np.rot90(img, k=-1, axes=(0, 1))
         
@@ -96,7 +96,7 @@ def objectRemoval(image, remove_mask=None, preserve_mask=None, nn=0, nm=0, rmask
             preserve_mask = np.rot90(preserve_mask, k=-1, axes=(0, 1))
 
         #Eliminamos las horizontales que sobren
-        for i in range(abs(n - nn)):
+        for i in range(nn):
             print("Eliminamos ", i)
             a, b, path = Basics.verticalSeam(img, energias.forwardEnergy, remove_mask, preserve_mask, rmask, pmask)
             
@@ -113,9 +113,9 @@ def objectRemoval(image, remove_mask=None, preserve_mask=None, nn=0, nm=0, rmask
 #        return img
     else:
         
-        print("\n Numero de seams a eliminar: ", abs(m-nm))
+        print("\nNumero de seams verticales a eliminar: ", nm)
         #Eliminamos las verticales que sobren
-        for i in range(abs(m - nm)):
+        for i in range(nm):
             print("Eliminamos", i)
             a, b, path = Basics.verticalSeam(img, energias.forwardEnergy, remove_mask, preserve_mask, rmask, pmask)
             img = Basics.removeSeam(img, path)
