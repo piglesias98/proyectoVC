@@ -8,9 +8,9 @@ Created on Sat Jan 18 13:38:44 2020
 import Basics
 import SeamsCarving
 
-
 img = Basics.readImage("imagenes/harry.jpg", 1)
-#mask_p = Basics.readImage("imagenes/positivo_harry.jpg", 0)
+mask_p = Basics.readImage("imagenes/positivo_harry.jpg", 0)
+mask_n = Basics.readImage("imagenes/negativo_harry.jpg", 0)
 #image = SeamsCarving.contentAwareResizing (img, img.shape[0] + 10, img.shape[1] + 10, False, energias.forwardEnergy)
 
 #Basics.representar_imagenes([img, image], ["original", "editada"])
@@ -30,6 +30,3 @@ eliminado = SeamsCarving.objectRemoval(coche, remove_mask=mask_n, rmask=True)
 restaurado = SeamsCarving.contentAwareResizing(eliminado, coche.shape[0], coche.shape[1])
 
 Basics.representar_imagenes([coche, eliminado, restaurado], ["Original", "Objeto eliminado", "Restaurado"])
-
-
-
