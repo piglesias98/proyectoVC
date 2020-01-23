@@ -8,30 +8,56 @@ from skimage.feature import hog
 # -> http://pages.cs.wisc.edu/~moayad/cs766/index.html
 # -> https://medium.com/swlh/real-world-dynamic-programming-seam-carving-9d11c5b0bfca
 # -> https://avikdas.com/2019/07/29/improved-seam-carving-with-forward-energy.html
+'''
+Energía simple (monobanda)
+
+Derivada en x e y de la imagen
+
+Entrada:
+    -> image: imagen
+
+Salida:
+    -> Matriz de energía
+'''
 def simpleEnergy (image):
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     image = image.astype(np.float)
 
-    x = np.abs(cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=5))
-    y = np.abs(cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=5))
+    x = np.abs(cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3))
+    y = np.abs(cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3))
 
     return x + y
 
-"""
-    Calcula la energía para cada canal r g b
-    No se aprecia diferencia en el resultado, no sé si es lo mismo
+'''
+Energía simple (tribanda)
 
-"""
+Calcula la energía para cada canal r g b
+
+Entrada:
+    -> image: imagen
+
+Salida:
+    -> Matriz de energía
+'''
 def simpleEnergyRGB(image):
     b, g, r = cv2.split(image)
-    b_energy = np.absolute(cv2.Sobel(b, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(b, cv2.CV_64F, 0, 1, ksize=5))
-    g_energy = np.absolute(cv2.Sobel(g, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(g, cv2.CV_64F, 0, 1, ksize=5))
-    r_energy = np.absolute(cv2.Sobel(r, cv2.CV_64F, 1, 0, ksize=5)) + np.absolute(cv2.Sobel(r, cv2.CV_64F, 0, 1, ksize=5))
+    b_energy = np.absolute(cv2.Sobel(b, cv2.CV_64F, 1, 0, ksize=3)) + np.absolute(cv2.Sobel(b, cv2.CV_64F, 0, 1, ksize=3))
+    g_energy = np.absolute(cv2.Sobel(g, cv2.CV_64F, 1, 0, ksize=3)) + np.absolute(cv2.Sobel(g, cv2.CV_64F, 0, 1, ksize=3))
+    r_energy = np.absolute(cv2.Sobel(r, cv2.CV_64F, 1, 0, ksize=3)) + np.absolute(cv2.Sobel(r, cv2.CV_64F, 0, 1, ksize=3))
 
     return b_energy + g_energy + r_energy
 
+'''
+Energía eHOG
+
+Entrada:
+    -> image: imagen
+
+Salida:
+    -> Matriz de energía
+'''
 def eHOG(image):
 
     simple_energy = simpleEnergyRGB(image)
@@ -59,14 +85,22 @@ def eHOG(image):
 
     return energy
 
+'''
+Energía "forward"
 
+Entrada:
+    -> image: imagen
+
+Salida:
+    -> Matriz de energía
+'''
 def forwardEnergy(image):
 
     n, m = image.shape[:2]
 
     energy = np.zeros((n,m))
     M = np.zeros((n,m))
-    
+
     img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY).astype(np.float64)
 
     img = cv2.copyMakeBorder(img, top=1, bottom=0, left=1, right=1, borderType=cv2.BORDER_REPLICATE)
