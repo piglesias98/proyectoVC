@@ -1,16 +1,18 @@
 ## Objetivos
 
 + Simple Energy RGB
-- Rotar la imagen en vez de usar horizontal seams  -> es una tontería
-- Distintos tipos de de energía
-	+ eHOG
-	- Forward Energy
++ Rotar la imagen en vez de usar horizontal seams  -> es una tontería
++ Distintos tipos de de energía
+	- eHOG
+	+ Forward Energy
 + Optimización con escalado previo
-- Optimizar el código en general -> creo que hacerlo con una matriz está bien y no hace falta usar punteros
-- Protección de objetos con máscaras de bits
-- Eliminación de objetos con máscaras de bits
++ Optimizar el código en general -> creo que hacerlo con una matriz está bien y no hace falta usar punteros
+	-> Numpy
++ Protección de objetos con máscaras de bits
++ Eliminación de objetos con máscaras de bits
 - Probar con muchas imágenes
 - MEMORIA!!!!!
+- Modular
 
 
 ## Enlaces útiles
@@ -34,3 +36,6 @@ http://cs.brown.edu/courses/cs129/results/proj3/taox/
 
 Explicación + implementación básica
 https://karthikkaranth.me/blog/implementing-seam-carving-with-python/
+
+Imagenes
+https://www.flickr.com/search/?text=pisa

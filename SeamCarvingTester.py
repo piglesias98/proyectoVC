@@ -4,15 +4,20 @@ Created on Sat Jan 18 13:38:44 2020
 
 @author: Paula
 """
-import cv2
+import Basics
+import energias
+import SeamsCarving
 
-import numpy as np
+img = Basics.readImage("imagenes/harry.jpg", 1)
+mask_p = Basics.readImage("imagenes/positivo_harry.jpg", 0)
+mask_n = Basics.readImage("imagenes/negativo_harry.jpg", 0)
+#image = SeamsCarving.contentAwareResizing (img, img.shape[0] + 10, img.shape[1] + 10, False, energias.forwardEnergy)
 
-from matplotlib import pyplot as plt
-#from skimage.feature import hog
+#Basics.representar_imagenes([img, image], ["original", "editada"])
 
-
-import SeamCarving
+#image = Basics.readImage("arco.jpg", 1)
+#image = SeamsCarving.contentAwareResizing (img, img.shape[0]-10, img.shape[1] + 10, True, energias.forwardEnergy)
+image = SeamsCarving.objectRemoval(img, remove_mask=mask_n, preserve_mask=mask_p, rmask=True, pmask=True)
 
 
 
@@ -217,7 +222,6 @@ def representar_imagenes(lista_imagen_leida, lista_titulos, n_col=2, tam=15):
 #img2 = SeamCarving.scaleAndRemoveSeams(image, 200, 400)
 #img1 = SeamCarving.removeOrderSeams (img, order)
 #
-
 #
 #representar_imagenes([img1, img2],["sin scale", "con scale"],1)
 
@@ -242,3 +246,5 @@ print(h,w)
 
 
 
+
+Basics.representar_imagenes([img, image], ["original", "editada (sin eficiencia)"])
