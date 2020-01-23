@@ -133,4 +133,24 @@ Content Aware Resizing
 #                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
 #input("Pulse Enter para continuar")
 
-print("-------------------OBJECT REMOVAL-------------------")
+#print("-------------------OBJECT REMOVAL-------------------")
+#print("Eliminación con una máscara")
+#eliminacion_arbol = SeamsCarving.objectRemoval(arbol2, remove_mask=arbol_n, rmask=True)
+#Basics.representar_imagenes([arbol2, eliminacion_arbol], ["Original", "Eliminación"])
+
+#input("Pulse Enter para continuar")
+#eliminacion_coche1 = SeamsCarving.objectRemoval(coche, remove_mask=coche_n1, rmask=True)
+#Basics.representar_imagenes([coche,eliminacion_coche1], ["Original", "Eliminación"])
+
+#input("Pulse Enter para continuar")
+#eliminacion_coche2 = SeamsCarving.objectRemoval(coche, remove_mask=coche_n2, rmask=True)
+#Basics.representar_imagenes([coche,eliminacion_coche2], ["Original", "Eliminación"])
+
+#input("Pulse Enter para continuar")
+#print("Restaurado")
+#
+#restaurado = SeamsCarving.contentAwareResizing (eliminacion_coche2, coche.shape[0], coche.shape[1], efficiency=True, energy = energias.forwardEnergy, draw=False)
+#
+#Basics.representar_imagenes([coche,eliminacion_coche2, restaurado], ["Original", "Eliminación", "Restaurado"], n_col=3)
+
+#input("Pulse Enter para continuar")
