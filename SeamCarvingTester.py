@@ -86,38 +86,40 @@ print("-------------------CONTENT AWARE RESIZING-------------------")
 
 print("Disminución en filas y columnas")
 
-arbol1_red = SeamsCarving.contentAwareResizing (arbol1, arbol1.shape[0]-50, arbol1.shape[1] - 70, efficiency=False, energy = energias.forwardEnergy, draw=True)
-arbol1_red_eff = SeamsCarving.contentAwareResizing (arbol1, arbol1.shape[0]-50, arbol1.shape[1] - 70, efficiency=True, energy = energias.forwardEnergy, draw=True)
-tit1 = "Reducción: " + "Filas = " + arbol1.shape[0] + "Columnas = " + arbol1.shape[0]
-tit1_eff = "Reducción eficiente: " + "Filas = " + arbol1_red_eff[0].shape[0] + "Columnas = " + arbol1_red_eff[0].shape[0]
+arbol1_red = SeamsCarving.contentAwareResizing (arbol1, arbol1.shape[0]-20, arbol1.shape[1] - 35, efficiency=False, energy = energias.forwardEnergy, draw=True)
+arbol1_red_eff = SeamsCarving.contentAwareResizing (arbol1, arbol1.shape[0]-20, arbol1.shape[1] - 35, efficiency=True, energy = energias.forwardEnergy, draw=True)
+tit1 = "Reducción: " + "Filas = " + str(arbol1_red[0].shape[0]) + "Columnas = " + str(arbol1_red[0].shape[1])
+tit1_eff = "Reducción eficiente: " + "Filas = " + str(arbol1_red_eff[0].shape[0]) + "Columnas = " + str(arbol1_red_eff[0].shape[1])
 
 Basics.representar_imagenes([arbol1_red[0] ,arbol1_red_eff[0],
                              arbol1_red[1], arbol1_red_eff[1]],
                             [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
+#
+##input("Pulse Enter para continuar")
+#print("Aumento en filas y columnas")
+#
+#campo_aum = SeamsCarving.contentAwareResizing (campo, campo.shape[0]+70, campo.shape[1]+30, efficiency=False, energy = energias.forwardEnergy, draw=True)
+#campo_aum_eff = SeamsCarving.contentAwareResizing (arbol1, campo.shape[0]+70, campo.shape[1]+30, efficiency=True, energy = energias.forwardEnergy, draw=True)
+#tit1 = "Aumento: " + "Filas = " + campo_aum[0].shape[0] + "Columnas = " + campo_aum[0].shape[1]
+#tit1_eff = "Aumento eficiente: " + "Filas = " + campo_aum_eff[0].shape[0] + "Columnas = " + campo_aum_eff[0].shape[1]
+#
+#Basics.representar_imagenes([campo_aum[0] ,campo_aum_eff[0],
+#                             campo_aum[1], campo_aum_eff[1]],
+#                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
+#
+#
+##input("Pulse Enter para continuar")
+#print("Aumento en filas y disminución en columnas")
+#roca_ad = SeamsCarving.contentAwareResizing (roca, roca.shape[0]+50, roca.shape[1]-30, efficiency=False, energy = energias.forwardEnergy, draw=True)
+#roca_ad_eff = SeamsCarving.contentAwareResizing (arbol1, roca.shape[0]+50, roca.shape[1]-30, efficiency=True, energy = energias.forwardEnergy, draw=True)
+#tit1 = "Aumento: " + "Filas = " + roca_ad[0].shape[0] + "Columnas = " + roca_ad[1].shape[0]
+#tit1_eff = "Aumento eficiente: " + "Filas = " + roca_ad_eff[0].shape[0] + "Columnas = " + roca_ad_eff[0].shape[1]
+#
+#Basics.representar_imagenes([roca_ad[0] ,roca_ad_eff[0],
+#                             roca_ad[1], roca_ad_eff[1]],
+#                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
 
-#input("Pulse Enter para continuar")
-print("Aumento en filas y columnas")
 
-campo = SeamsCarving.contentAwareResizing (campo, campo.shape[0]+70, campo.shape[1]+30, efficiency=False, energy = energias.forwardEnergy, draw=True)
-campo_eff = SeamsCarving.contentAwareResizing (arbol1, campo.shape[0]+70, campo.shape[1]+30, efficiency=True, energy = energias.forwardEnergy, draw=True)
-tit1 = "Aumento: " + "Filas = " + campo.shape[0] + "Columnas = " + campo.shape[0]
-tit1_eff = "Aumento eficiente: " + "Filas = " + campo_eff.shape[0] + "Columnas = " + campo_eff.shape[0]
-
-Basics.representar_imagenes([campo[0] ,campo_eff[0],
-                             campo[1], campo_eff[1]],
-                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
-
-
-#input("Pulse Enter para continuar")
-print("Aumento en filas y disminución en columnas")
-roca = SeamsCarving.contentAwareResizing (roca, roca.shape[0]+50, roca.shape[1]-30, efficiency=False, energy = energias.forwardEnergy, draw=True)
-campo_eff = SeamsCarving.contentAwareResizing (arbol1, roca.shape[0]+70, roca.shape[1]+30, efficiency=True, energy = energias.forwardEnergy, draw=True)
-tit1 = "Aumento: " + "Filas = " + campo.shape[0] + "Columnas = " + campo.shape[0]
-tit1_eff = "Aumento eficiente: " + "Filas = " + campo_eff.shape[0] + "Columnas = " + campo_eff.shape[0]
-
-Basics.representar_imagenes([campo[0] ,campo_eff[0],
-                             campo[1], campo_eff[1]],
-                            [tit1, tit1_eff, tit1, tit1_eff], n_col=2, tam = 50)
 
 
 

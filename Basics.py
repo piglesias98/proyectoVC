@@ -324,6 +324,8 @@ Salida:
 def removeOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
 
     image = img.copy()
+    
+    cont = 0    #contador
 
     if draw:
         resultado = img.copy()
@@ -347,6 +349,9 @@ def removeOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
 
             if draw:
                 resultado = np.rot90(resultado, k=1, axes=(0, 1))
+                
+        print("Seam ", cont, " eliminada")
+        cont = cont + 1
 
     if draw:
         return image, resultado
@@ -371,7 +376,9 @@ Salida:
 def addOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
 
     image = img.copy()
-
+    
+    cont = 0 #contador
+    
     if draw:
         resultado = img.copy()
 
@@ -391,6 +398,9 @@ def addOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
                     image = np.rot90(image, k=-1, axes=(0, 1))
 
                 image = addSeam (image, caminos[i])
+                
+                print("Seam ", cont, " aumentada")
+                cont = cont + 1
 
                 if orden[i] == 0:
                     image = np.rot90(image, k=1, axes=(0, 1))
@@ -435,7 +445,10 @@ def addOrderSeams (img, order, funcion=energias.forwardEnergy, draw=False):
             image = np.rot90(image, k=-1, axes=(0, 1))
 
         image = addSeam (image, caminos[i])
-
+        
+        print("Seam ", cont, " aumentada")
+        cont = cont + 1
+        
         if orden[i] == 0:
             image = np.rot90(image, k=1, axes=(0, 1))
 
@@ -466,6 +479,7 @@ PRE: Se tiene que poder eliminar, al menos, una columna (aunque no se quiera
 '''
 def seamsOrder (img, nn, nm, funcion=energias.forwardEnergy):
 
+    
     image = img.copy()
 
     n, m = image.shape[:2]
@@ -652,27 +666,24 @@ Salida:
 def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy, draw=False):
 
     n, m = img.shape[:2]
-    print("n", n, "m", m)
     if accion == removeOrderSeams: scale_factor = max(nn/n, nm/m)
     else: scale_factor = min(nn/n, nm/m)
 
     height = int(n * scale_factor)
     width = int (m * scale_factor)
     dim = (width,height)
-    print("dim", dim)
     # resize image
     resized = cv2.resize(img, dim)
-    print("resize shape", resized.shape)
     #Rotamos
     if abs(height - nn) != 0:
-        print("height - nn", height-nn)
         order = np.ones((abs(height - nn)))
 
         resized = np.rot90(resized, k=-1, axes=(0, 1))
 
     elif abs(width - nm) != 0:
         order = np.ones((abs(width - nm)))
-
+    else:
+        return resized, resized
     #Eliminamos las verticales o horizontales que sobren
     resized = accion(resized, order, energia, draw)
 
@@ -783,7 +794,7 @@ def drawSeams(vertical_seams, horizontal_seams, image):
 
     for x in vertical_seams:
 
-        for i in range (0, n):
+        for i in range (0, min(n, len(x))):
 
             image[n - i - 1, x[i], 0] = 0
             image[n - i - 1, x[i], 1] = 0
@@ -791,7 +802,7 @@ def drawSeams(vertical_seams, horizontal_seams, image):
 
     for y in horizontal_seams:
 
-        for j in range (0, m):
+        for j in range (0, min(m, len(y))):
 
             image[y[j], m - j - 1, 0] = 0
             image[y[j], m - j - 1, 1] = 0

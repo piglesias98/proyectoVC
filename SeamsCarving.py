@@ -20,6 +20,7 @@ Salida:
 '''
 def contentAwareResizing (img, nn, nm, efficiency=True, energy=energias.forwardEnergy, draw=False):
 
+    print("entra en content aware")
     n, m = img.shape[:2]
 
     dif_n = n - nn
