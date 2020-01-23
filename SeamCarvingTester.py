@@ -26,9 +26,10 @@ campo = Basics.readImage("imagenes/campo.jpg", 1)
 coche = Basics.readImage("imagenes/coches.jpg", 1)
 mask_n = Basics.readImage("imagenes/mascara_coches1.jpg", 0)
 
-image = SeamsCarving.objectRemoval(coche, remove_mask=mask_n, rmask=True)
+eliminado = SeamsCarving.objectRemoval(coche, remove_mask=mask_n, rmask=True)
+restaurado = SeamsCarving.contentAwareResizing(eliminado, coche.shape[0], coche.shape[1])
 
-Basics.representar_imagenes([coche, image], ["original", "objeto eliminado"])
+Basics.representar_imagenes([coche, eliminado, restaurado], ["Original", "Objeto eliminado", "Restaurado"])
 
 
 
