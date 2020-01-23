@@ -617,27 +617,29 @@ Salida:
 def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwardEnergy):
 
     n, m = img.shape[:2]
-
+    print("n", n, "m", m)
     if accion == removeOrderSeams: scale_factor = max(nn/n, nm/m)
     else: scale_factor = min(nn/n, nm/m)
-
+    print("scale factor", scale_factor)
     height = int(n * scale_factor)
     width = int (m * scale_factor)
-    dim = (width, height)
-
+    dim = (width,height)
+    print("dim", dim)
     # resize image
     resized = cv2.resize(img, dim)
-
+    print("resize shape", resized.shape)
     #Rotamos
     if abs(height - nn) != 0:
+        print("height - nn", height-nn)
         order = np.ones((abs(height - nn)))
 
         resized = np.rot90(resized, k=-1, axes=(0, 1))
 
-    if abs(width - nm) != 0:
+    elif abs(width - nm) != 0:
         order = np.ones((abs(width - nm)))
 
     #Eliminamos las verticales o horizontales que sobren
+    print("order", order.shape)
     resized = accion(resized, order, energia)
 
 #    for i in range(abs(height - nn)):
