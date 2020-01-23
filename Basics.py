@@ -710,13 +710,10 @@ def scaleAndCarve (img, nn, nm, accion=removeOrderSeams, energia=energias.forwar
         if draw:
             reduced = np.rot90(resized[0], k=1, axes=(0, 1))
             drawed = np.rot90(resized[1], k=1, axes=(0, 1))
+            return reduced, drawed
         else:
-            resized = np.rot90(resized, k=1, axes=(0, 1))
+            return np.rot90(resized, k=1, axes=(0, 1))
 
-
-    if draw:
-        return reduced, drawed
-    
     
     return resized
 
