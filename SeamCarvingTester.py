@@ -32,6 +32,11 @@ roca = Basics.readImage("imagenes/roca.jpg", 1)
 
 banco = Basics.readImage("imagenes/banco.jpg", 1)
 
+navidad = Basics.readImage("imagenes/navidad.png", 1)
+
+londres = Basics.readImage("imagenes/londres.jpg", 1)
+
+
 
 #Imágenes para Object Removal
 arbol2 = Basics.readImage("imagenes/arbol2.jpg", 1)
@@ -44,6 +49,9 @@ harry_n = Basics.readImage("imagenes/negativo_harry.jpg", 0)
 coche = Basics.readImage("imagenes/coches.jpg", 1)
 coche_n1 = Basics.readImage("imagenes/mascara_coches1.jpg", 0)
 coche_n2 = Basics.readImage("imagenes/mascara_coches2.jpg", 0)
+
+friends = Basics.readImage("imagenes/friends.jpg", 1)
+mascara_friends = Basics.readImage("imagenes/mascara_friends.jpg", 0)
 
 
 '''
@@ -201,4 +209,18 @@ eliminacion_harry = SeamsCarving.objectRemoval(harry, remove_mask=harry_n, prese
 
 Basics.representar_imagenes([harry,eliminacion_harry], ["Original", "Eliminación"], n_col=1)
 
+input("Pulse Enter para continuar")
 
+print("----------------------CASOS CRÍTICOS------------------------------")
+
+print("Caso crítico en disminución en filas y columnas")
+
+londres_red = SeamsCarving.contentAwareResizing (londres, londres.shape[0], londres.shape[1] - 200, efficiency=True, energy = energias.forwardEnergy, draw=True)
+
+Basics.representar_imagenes([londres, londres_red[0], londres_red[1]],["Original", "Reducido", "Seams"], n_col=3)
+
+input("Pulse Enter para continuar")
+print("Caso crítico en eliminación de objeto")
+
+eliminacion_friends = SeamsCarving.objectRemoval(friends, remove_mask=mascara_friends, rmask=True)
+Basics.representar_imagenes([friends,eliminacion_friends], ["Original", "Eliminación"])

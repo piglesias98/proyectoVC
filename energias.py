@@ -107,7 +107,7 @@ def forwardEnergy(image):
 
     U = np.roll(img, 1, axis=0)
     L = np.roll(img, 1, axis=1)
-    R = np.roll(img, -1, axis=1 )
+    R = np.roll(img, -1, axis=1)
 
     cU = np.abs(R - L)
     cL = np.abs(U - L) + cU
@@ -122,12 +122,8 @@ def forwardEnergy(image):
     for i in range(1, n):
 
         mU = M[i-1]
-        mL = np.roll(mU, 1)
+        mL = np.roll(mU, 1) 
         mR = np.roll(mU, -1)
-
-        # M(x,y) = min {M(x-1,y-1) + CL(x,y)
-        #               M(x,y-1) + CU(x,y)
-        #               M(x+1,y+1) + CR(x,y)}
 
         mLUR = np.array([mL, mU, mR])
         cLUR = np.array([cL[i], cU[i], cR[i]])
