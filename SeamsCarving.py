@@ -82,10 +82,11 @@ def objectRemoval(image, remove_mask=None, preserve_mask=None, nn=0, nm=0, rmask
 
     if rmask:
         nn, nm = Basics.maskSize(remove_mask)
+        print("nn", nn, "nm", nm)
 
-    if nn>nm:   #Eliminamos las filas
+    if nn<nm:   #Eliminamos las filas
         
-        print("\n Numero de seams a eliminar: ", abs(nn))
+        print("\n Numero de seams horizontales a eliminar: ", abs(nn))
         #Rotamos
         img = np.rot90(img, k=-1, axes=(0, 1))
         
@@ -113,7 +114,7 @@ def objectRemoval(image, remove_mask=None, preserve_mask=None, nn=0, nm=0, rmask
 #        return img
     else:
         
-        print("\n Numero de seams a eliminar: ", abs(nm))
+        print("\n Numero de seams verticales a eliminar: ", abs(nm))
         #Eliminamos las verticales que sobren
         for i in range(abs(nm)):
             print("Eliminamos", i)
